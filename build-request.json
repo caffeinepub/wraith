@@ -1,0 +1,107 @@
+{
+  "kind": "build_request",
+  "title": "WRAITH Ops Platform — Mission Dashboard, Intelligence Hub & Field Ops Briefing Tool",
+  "projectName": "WRAITH Ops",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Create a Mission Management Dashboard where users can create, view, update, and delete covert missions. Each mission must include: codename, status (Active / Compromised / Completed / Aborted), threat level (Low / Elevated / Critical), assigned operatives, mission type (Recon / Cyber / Counter-Terror / In-Person Op), objectives list, and field reports (timestamped log entries). Display missions in a sortable, filterable list with status badges and threat indicators.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-8"
+        ],
+        "quotes": [
+          "Mission Management Dashboard - Track covert missions, threats, and field reports"
+        ]
+      },
+      "acceptanceCriteria": [
+        "User can create a new mission with all required fields",
+        "User can update mission status and threat level",
+        "User can append field report entries to a mission",
+        "Missions are listed with status badges and threat level indicators",
+        "User can filter missions by status and threat level",
+        "Missions persist in backend stable storage"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Build an Intelligence Hub module with three sub-sections: (a) Asset Profiles — create and manage profiles for field assets/operatives with codename, clearance level, specialization, status, and bio notes; (b) Threat Assessments — create threat entries with subject name, threat category, risk score (1–10), summary, and linked missions; (c) Encrypted Notes — create freeform classified notes with a title, body, classification tag (CONFIDENTIAL / SECRET / TOP SECRET / TS-SCI), and timestamp. All records must be stored and retrievable from the backend.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-8"
+        ],
+        "quotes": [
+          "Intelligence Hub - asset profiles, threat assessments, and encrypted notes"
+        ]
+      },
+      "acceptanceCriteria": [
+        "User can create, view, edit, and delete asset profiles",
+        "User can create, view, edit, and delete threat assessments with a risk score",
+        "User can create, view, edit, and delete encrypted notes with classification tags",
+        "All three sub-sections are accessible from a tabbed or sectioned UI within the Intelligence Hub",
+        "All records persist in backend stable storage"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Implement a Field Ops Briefing Tool that allows users to compose and display structured mission briefings. Each briefing must include: operation codename, mission date, lead officer, objectives list (add/remove items), High-Value Target (HVT) profiles (name, description, threat tier), exfil routes (freeform text), rules of engagement, and classification level. Provide a 'Briefing View' mode that renders the briefing as a formatted classified document, suitable for presentation.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-8"
+        ],
+        "quotes": [
+          "Field Ops Briefing Tool - build and display mission briefings with objectives and HVT profiles"
+        ]
+      },
+      "acceptanceCriteria": [
+        "User can create a new briefing with all required fields",
+        "User can add and remove items from the objectives list",
+        "User can add HVT profiles with name, description, and threat tier",
+        "Briefing View mode renders a formatted, print-ready classified document layout",
+        "Briefings are saved and retrievable from the backend",
+        "User can edit and delete existing briefings"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Apply a cohesive dark classified-ops visual theme across the entire application. Use a near-black background palette with high-contrast text (off-white/amber/red), monospaced or military-style typography, glowing accent elements suggesting digital/terminal aesthetics, classification banner strips at the top of sensitive views, and redaction-style UI components (e.g., blacked-out bars for high-sensitivity fields). Navigation should use a side panel or top bar styled as a classified operations interface. Apply the theme consistently to all three modules.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1",
+          "msg-8"
+        ]
+      },
+      "acceptanceCriteria": [
+        "All pages use a dark near-black background",
+        "Typography is monospaced or military-inspired with amber/red/off-white accents",
+        "Classification banner strips appear on sensitive views",
+        "Navigation is styled as a classified ops control panel",
+        "Theme is applied consistently across all three modules"
+      ]
+    }
+  ],
+  "constraints": [
+    "All data must be stored in the Motoko backend single actor using stable storage",
+    "Do not edit any files under frontend/src/hooks/ or frontend/src/components/ui",
+    "No external APIs, databases, or cloud services — ICP backend only"
+  ],
+  "nonGoals": [
+    "Real authentication beyond Internet Identity (if integrated)",
+    "Real-time collaboration or WebSocket features",
+    "Actual encryption of stored notes (classification tags are cosmetic/organizational)",
+    "Map or geolocation features for exfil routes",
+    "Mobile app or native client"
+  ],
+  "imageRequirements": {
+    "required": [
+      "Dark classified agency logo emblem — a stylized wraith/ghost silhouette inside a hexagonal badge with the text 'W.R.A.I.T.H.' and subtle circuit-line details, monochrome with amber glow accents (wraith-logo.dim_256x256.png)",
+      "Dark textured background with faint redacted-document scanlines and noise, suitable as a full-page app background (wraith-bg.dim_1920x1080.png)"
+    ],
+    "edits": []
+  }
+}

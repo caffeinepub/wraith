@@ -1,0 +1,10 @@
+{
+  "frontend/src/App.tsx": "Main application entry point with TanStack Router setup, authentication guard (login screen for unauthenticated users), profile setup modal trigger, and routes for /missions, /intelligence, and /briefings wrapped in the Layout component.",
+  "frontend/src/components/ThreatAssessmentsSection.tsx": "Intelligence Hub sub-section for managing threat assessments, displaying subject name, category, risk score with color coding, linked missions count, and CRUD actions with confirmation dialogs.",
+  "frontend/src/components/ClassifiedNoteForm.tsx": "Form component for creating and editing classified notes with title, body, classification level dropdown, and author fields, wired to backend create/update mutations.",
+  "frontend/src/components/EncryptedNotesSection.tsx": "Intelligence Hub sub-section for managing encrypted classified notes with expandable body view, classification badges, and full CRUD operations.",
+  "frontend/src/pages/IntelligenceHub.tsx": "Intelligence Hub page with three tabbed sub-sections: Asset Profiles, Threat Assessments, and Encrypted Notes, each in a styled ops-card container.",
+  "frontend/src/components/BriefingView.tsx": "Full-screen formatted classified document viewer for mission briefings, displaying classification banners, objectives with priority, HVT profiles with threat tiers, exfil routes, and rules of engagement with print support.",
+  "frontend/src/components/BriefingForm.tsx": "Form component for creating and editing mission briefings with dynamic objectives list, HVT profile management, exfil routes, rules of engagement, and classification level selection.",
+  "frontend/src/pages/FieldOpsBriefing.tsx": "Field Ops Briefing Tool page listing all mission briefings with stats, supporting create/edit/delete/view operations and launching the full-screen BriefingView for formatted document display."
+}

@@ -1,0 +1,221 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "WRAITH Ops Platform — Mission Dashboard, Intelligence Hub & Field Ops Briefing Tool",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Implement Mission Management Dashboard with create, view, update, delete capabilities for covert missions including codename, status, threat level, assigned operatives, mission type, objectives, and field reports with sortable/filterable display",
+      "acceptanceCriteria": [
+        "User can create a new mission with all required fields",
+        "User can update mission status and threat level",
+        "User can append field report entries to a mission",
+        "Missions are listed with status badges and threat level indicators",
+        "User can filter missions by status and threat level",
+        "Missions persist in backend stable storage"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/MissionDashboard.tsx",
+          "operation": "create",
+          "description": "Create the Mission Management Dashboard page component. Display a sortable, filterable list of missions with status badges (Active/Compromised/Completed/Aborted) and threat level indicators (Low/Elevated/Critical). Include action buttons to create new missions, view/edit existing missions, and delete missions. Wire mission data fetching using backend methods getAllMissions() and getMissionsByStatus(). Use the authorization component to ensure only authenticated users can access this page."
+        },
+        {
+          "path": "frontend/src/components/MissionList.tsx",
+          "operation": "create",
+          "description": "Create a MissionList component that renders the mission table/grid with columns for codename, status, threat level, mission type, and assigned operatives. Implement sorting by any column and filtering by status and threat level. Display status badges with appropriate color coding and threat indicators. Include action buttons for each mission row (view, edit, delete). Use React Query to manage mission data state."
+        },
+        {
+          "path": "frontend/src/components/MissionForm.tsx",
+          "operation": "create",
+          "description": "Create a MissionForm component for creating and editing missions. Include form fields for codename (text input), status (dropdown: Active/Compromised/Completed/Aborted), threat level (dropdown: Low/Elevated/Critical), assigned operatives (multi-input or tag input), mission type (dropdown: Recon/Cyber/Counter-Terror/In-Person Op), and objectives (dynamic list with add/remove). Wire to backend methods createMission() and updateMission(). Include form validation and error handling."
+        },
+        {
+          "path": "frontend/src/components/MissionDetail.tsx",
+          "operation": "create",
+          "description": "Create a MissionDetail component for viewing full mission details including all fields plus the field reports log. Display field reports as timestamped entries with author information. Include a form to append new field report entries that calls backend method addMissionFieldReport(). Show mission metadata like creation date and last update. Include edit and delete action buttons."
+        },
+        {
+          "path": "frontend/src/components/FieldReportsLog.tsx",
+          "operation": "create",
+          "description": "Create a FieldReportsLog component to display the timestamped field reports for a mission. Render each report entry with timestamp, author principal/name, and content. Include a form at the bottom to add new field report entries. Style as a terminal-like log display with monospaced font and chronological ordering."
+        },
+        {
+          "path": "frontend/src/hooks/useMissions.ts",
+          "operation": "create",
+          "description": "Create custom React Query hooks for mission operations: useGetAllMissions(), useGetMission(codename), useGetMissionsByStatus(status), useCreateMission(), useUpdateMission(), useDeleteMission(), and useAddFieldReport(). Implement proper query invalidation on mutations to keep the mission list up to date. Handle loading and error states."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Build Intelligence Hub module with three sub-sections: Asset Profiles (manage operatives with codename, clearance, specialization, status, bio), Threat Assessments (threat entries with subject, category, risk score, summary, linked missions), and Encrypted Notes (classified notes with title, body, classification tag, timestamp)",
+      "acceptanceCriteria": [
+        "User can create, view, edit, and delete asset profiles",
+        "User can create, view, edit, and delete threat assessments with a risk score",
+        "User can create, view, edit, and delete encrypted notes with classification tags",
+        "All three sub-sections are accessible from a tabbed or sectioned UI within the Intelligence Hub",
+        "All records persist in backend stable storage"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/IntelligenceHub.tsx",
+          "operation": "create",
+          "description": "Create the Intelligence Hub page component with a tabbed interface or sectioned layout containing three sub-sections: Asset Profiles, Threat Assessments, and Encrypted Notes. Implement tab navigation between the three sections. Each section should display its respective list and provide action buttons to create new entries. Use the authorization component to ensure only authenticated users can access this page."
+        },
+        {
+          "path": "frontend/src/components/AssetProfilesSection.tsx",
+          "operation": "create",
+          "description": "Create AssetProfilesSection component for the Asset Profiles sub-section. Display a list of asset/operative profiles showing codename, clearance level, specialization, and status. Include action buttons to create, edit, and delete profiles. Wire to backend methods getAllAssetProfiles(), createAssetProfile(), updateAssetProfile(), deleteAssetProfile(), and getAssetProfile()."
+        },
+        {
+          "path": "frontend/src/components/AssetProfileForm.tsx",
+          "operation": "create",
+          "description": "Create AssetProfileForm component for creating and editing asset profiles. Include form fields for codename (text), clearance level (dropdown: CONFIDENTIAL/SECRET/TOP SECRET/TS-SCI), specialization (multi-select: Cyber/Counter-Intel/Counter-Terror/Counter-Espionage/Human Intel/Military Intel/Counter-Insurgency/Drug Intel/Other), status (dropdown: Active/Inactive/Terminated), and bio notes (textarea). Implement form validation and wire to createAssetProfile() and updateAssetProfile()."
+        },
+        {
+          "path": "frontend/src/components/ThreatAssessmentsSection.tsx",
+          "operation": "create",
+          "description": "Create ThreatAssessmentsSection component for the Threat Assessments sub-section. Display a list of threat assessments showing subject name, threat category, risk score (1-10), and linked missions count. Include action buttons to create, edit, and delete assessments. Wire to backend methods getAllThreatAssessments(), createThreatAssessment(), updateThreatAssessment(), deleteThreatAssessment(), and getThreatAssessment()."
+        },
+        {
+          "path": "frontend/src/components/ThreatAssessmentForm.tsx",
+          "operation": "create",
+          "description": "Create ThreatAssessmentForm component for creating and editing threat assessments. Include form fields for subject name (text), threat category (dropdown: Cyber/Counter-Terror/Counter-Espionage/Counter-Intel/Counter-Insurgency/Arms Smuggling/Drug Smuggling/Human Smuggling/Other), risk score (number input 1-10 with slider or picker), summary (textarea), and linked missions (multi-select of existing mission codenames). Implement form validation including risk score range validation. Wire to createThreatAssessment() and updateThreatAssessment()."
+        },
+        {
+          "path": "frontend/src/components/EncryptedNotesSection.tsx",
+          "operation": "create",
+          "description": "Create EncryptedNotesSection component for the Encrypted Notes sub-section. Display a list of classified notes showing title, classification tag (CONFIDENTIAL/SECRET/TOP SECRET/TS-SCI), and timestamp. Style classification tags with color-coded badges. Include action buttons to create, edit, and delete notes. Wire to backend methods getAllClassifiedNotes(), createClassifiedNote(), updateClassifiedNote(), deleteClassifiedNote(), and getClassifiedNote()."
+        },
+        {
+          "path": "frontend/src/components/ClassifiedNoteForm.tsx",
+          "operation": "create",
+          "description": "Create ClassifiedNoteForm component for creating and editing encrypted notes. Include form fields for title (text), body (textarea with rich text or markdown support), classification tag (dropdown: CONFIDENTIAL/SECRET/TOP SECRET/TS-SCI), and author (text, pre-filled from user profile). Display timestamp as read-only. Implement form validation and wire to createClassifiedNote() and updateClassifiedNote()."
+        },
+        {
+          "path": "frontend/src/hooks/useAssetProfiles.ts",
+          "operation": "create",
+          "description": "Create custom React Query hooks for asset profile operations: useGetAllAssetProfiles(), useGetAssetProfile(codename), useCreateAssetProfile(), useUpdateAssetProfile(), useDeleteAssetProfile(). Implement proper query invalidation on mutations. Handle loading and error states."
+        },
+        {
+          "path": "frontend/src/hooks/useThreatAssessments.ts",
+          "operation": "create",
+          "description": "Create custom React Query hooks for threat assessment operations: useGetAllThreatAssessments(), useGetThreatAssessment(subjectName), useCreateThreatAssessment(), useUpdateThreatAssessment(), useDeleteThreatAssessment(). Implement proper query invalidation on mutations. Handle loading and error states."
+        },
+        {
+          "path": "frontend/src/hooks/useClassifiedNotes.ts",
+          "operation": "create",
+          "description": "Create custom React Query hooks for classified note operations: useGetAllClassifiedNotes(), useGetClassifiedNote(title), useCreateClassifiedNote(), useUpdateClassifiedNote(), useDeleteClassifiedNote(). Implement proper query invalidation on mutations. Handle loading and error states."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Implement Field Ops Briefing Tool for composing and displaying structured mission briefings with operation codename, mission date, lead officer, objectives list, HVT profiles, exfil routes, rules of engagement, classification level, and a formatted Briefing View mode",
+      "acceptanceCriteria": [
+        "User can create a new briefing with all required fields",
+        "User can add and remove items from the objectives list",
+        "User can add HVT profiles with name, description, and threat tier",
+        "Briefing View mode renders a formatted, print-ready classified document layout",
+        "Briefings are saved and retrievable from the backend",
+        "User can edit and delete existing briefings"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/FieldOpsBriefing.tsx",
+          "operation": "create",
+          "description": "Create the Field Ops Briefing Tool page component. Display a list of existing briefings with operation codename, mission date, and classification level. Include action buttons to create new briefings, edit, delete, and enter Briefing View mode for each briefing. Wire to backend methods getAllMissionBriefings(), getMissionBriefing(), createMissionBriefing(), updateMissionBriefing(), and deleteMissionBriefing(). Use the authorization component to ensure only authenticated users can access this page."
+        },
+        {
+          "path": "frontend/src/components/BriefingForm.tsx",
+          "operation": "create",
+          "description": "Create BriefingForm component for creating and editing mission briefings. Include form fields for operation codename (text), mission date (date picker), lead officer (text), objectives list (dynamic list with add/remove buttons and priority selector: Low/Medium/High), HVT profiles section (dynamic list with fields for name, description, threat tier dropdown: Low/Elevated/Critical), exfil routes (textarea), rules of engagement (textarea), and classification level (dropdown: CONFIDENTIAL/SECRET/TOP SECRET/TS-SCI). Implement form validation and wire to createMissionBriefing() and updateMissionBriefing()."
+        },
+        {
+          "path": "frontend/src/components/BriefingView.tsx",
+          "operation": "create",
+          "description": "Create BriefingView component that renders a mission briefing in a formatted classified document layout. Display a classification banner at the top matching the briefing's classification level. Render operation codename as document header, mission date, lead officer, objectives in a numbered list with priority indicators, HVT profiles in structured cards with threat tier badges, exfil routes, and rules of engagement. Style as a print-ready document with military/classified aesthetics including monospaced fonts, clear sections, and appropriate spacing. Include a print button and close/exit button to return to edit mode."
+        },
+        {
+          "path": "frontend/src/components/HVTProfileInput.tsx",
+          "operation": "create",
+          "description": "Create HVTProfileInput component as a sub-form for adding and editing HVT (High-Value Target) profiles within the briefing form. Include fields for name (text), description (textarea), and threat tier (dropdown: Low/Elevated/Critical). Render as a card or panel with remove button. Support multiple HVT profiles in the parent form."
+        },
+        {
+          "path": "frontend/src/components/ObjectiveInput.tsx",
+          "operation": "create",
+          "description": "Create ObjectiveInput component as a sub-form for adding and editing objectives within the briefing form. Include fields for objective text (text input) and priority (dropdown: Low/Medium/High). Render as a list item with remove button and drag handle for reordering. Support multiple objectives in the parent form."
+        },
+        {
+          "path": "frontend/src/hooks/useMissionBriefings.ts",
+          "operation": "create",
+          "description": "Create custom React Query hooks for mission briefing operations: useGetAllMissionBriefings(), useGetMissionBriefing(operationCodename), useCreateMissionBriefing(), useUpdateMissionBriefing(), useDeleteMissionBriefing(). Implement proper query invalidation on mutations. Handle loading and error states."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Apply cohesive dark classified-ops visual theme with near-black background, high-contrast text (off-white/amber/red), monospaced military typography, glowing accents, classification banners, redaction-style UI components, and classified ops navigation styling across all modules",
+      "acceptanceCriteria": [
+        "All pages use a dark near-black background",
+        "Typography is monospaced or military-inspired with amber/red/off-white accents",
+        "Classification banner strips appear on sensitive views",
+        "Navigation is styled as a classified ops control panel",
+        "Theme is applied consistently across all three modules"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Apply the dark classified-ops visual theme globally. Set the root background to near-black (#0a0a0a or #0d0d0d), primary text to off-white (#e8e8e8), and define accent colors for amber (#ffb700, #ffa500), red (#ff3333, #cc0000), and terminal green (#00ff00). Configure monospaced or military-style font families (e.g., 'Courier New', 'Roboto Mono', or 'Share Tech Mono'). Define CSS custom properties for classification level colors (confidential: yellow, secret: orange, top-secret: red, TS-SCI: crimson). Add utility classes for glowing effects, redaction bars, and classification banners. Set high-contrast text for accessibility."
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Extend Tailwind configuration to support the classified-ops theme. Add custom colors for near-black backgrounds, off-white text, amber/red/terminal-green accents, and classification level colors. Configure monospaced font family in theme.fontFamily. Add custom utilities for glow effects (box-shadow with amber/red), redaction bars (black background with strike-through), and classification banners. Ensure dark mode is default."
+        },
+        {
+          "path": "frontend/src/components/Layout.tsx",
+          "operation": "create",
+          "description": "Create a Layout component that wraps all application pages and provides consistent structure. Include a top or side navigation bar styled as a classified operations control panel with the W.R.A.I.T.H. logo (frontend/public/assets/generated/wraith-logo.dim_256x256.png) and glowing accents. Add a classification banner strip at the very top of the viewport (e.g., 'CLASSIFIED // TOP SECRET') with appropriate color coding. Include navigation links to Mission Dashboard, Intelligence Hub, and Field Ops Briefing pages. Integrate login/logout button and user profile display. Apply the dark background texture image (frontend/public/assets/generated/wraith-bg.dim_1920x1080.png) as a fixed background for the entire layout."
+        },
+        {
+          "path": "frontend/src/components/ClassificationBanner.tsx",
+          "operation": "create",
+          "description": "Create a ClassificationBanner component that displays a horizontal classification banner strip with text like 'CLASSIFIED // [LEVEL]' where level is CONFIDENTIAL, SECRET, TOP SECRET, or TS-SCI. Apply color coding: yellow for confidential, orange for secret, red for top-secret, crimson for TS-SCI. Use uppercase monospaced text and center the banner at the top of views requiring classification marking. Accept classification level as a prop."
+        },
+        {
+          "path": "frontend/src/components/RedactionBar.tsx",
+          "operation": "create",
+          "description": "Create a RedactionBar component for styling redacted or high-sensitivity UI elements. Render as a black bar overlay with optional strike-through or pixelated effect. Accept content and sensitivity level as props. Use for masking sensitive field values or creating redaction aesthetics in the UI."
+        },
+        {
+          "path": "frontend/src/components/StatusBadge.tsx",
+          "operation": "create",
+          "description": "Create a StatusBadge component for displaying mission status with color-coded styling. Support status values: Active (green glow), Compromised (red glow), Completed (blue/gray), Aborted (dark red). Render as a small pill or badge with uppercase monospaced text and appropriate glow effect. Accept status as prop."
+        },
+        {
+          "path": "frontend/src/components/ThreatIndicator.tsx",
+          "operation": "create",
+          "description": "Create a ThreatIndicator component for displaying threat levels with color-coded styling. Support threat levels: Low (yellow/amber), Elevated (orange), Critical (red with glow). Render as an icon or badge with visual intensity matching the threat level. Accept threat level as prop."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire the Layout component to wrap all application routes. Set up React Router routes for /missions (MissionDashboard), /intelligence (IntelligenceHub), and /briefings (FieldOpsBriefing). Integrate the authorization component to require login before accessing any routes. Add a user profile setup flow for first-time users following the authorization component's usage instructions. Ensure logged-out users see only a login screen, and clear all cached data on logout."
+        },
+        {
+          "path": "frontend/src/components/Navigation.tsx",
+          "operation": "create",
+          "description": "Create a Navigation component for the classified ops control panel navigation bar. Include links to Mission Dashboard, Intelligence Hub, and Field Ops Briefing. Display the W.R.A.I.T.H. logo (frontend/public/assets/generated/wraith-logo.dim_256x256.png) with a subtle amber glow effect. Show the current user's callsign and role. Integrate the login/logout button from the authorization component. Style with near-black background, glowing terminal-green highlights for active routes, and monospaced labels."
+        },
+        {
+          "path": "frontend/src/hooks/useUserProfile.ts",
+          "operation": "create",
+          "description": "Create custom React Query hooks for user profile operations: useGetCallerUserProfile(), useSaveCallerUserProfile(). Follow the authorization component's usage instructions for preventing profile setup modal flash by checking actorFetching and isFetched states. Handle user profile retrieval and saving according to the component's guidelines."
+        }
+      ]
+    }
+  ]
+}
