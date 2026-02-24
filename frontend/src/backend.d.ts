@@ -172,6 +172,7 @@ export enum Variant_low_high_medium {
     medium = "medium"
 }
 export interface backendInterface {
+    addAdmin(p: Principal): Promise<void>;
     addMissionFieldReport(codename: string, reportContent: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     createAssetProfile(codename: string, clearanceLevel: ClearanceLevel, specialization: Array<SpecializedSkill>, status: Variant_active_terminated_inactive, bio: string): Promise<void>;
@@ -184,6 +185,7 @@ export interface backendInterface {
     deleteMission(codename: string): Promise<void>;
     deleteMissionBriefing(operationCodename: string): Promise<void>;
     deleteThreatAssessment(subjectName: string): Promise<void>;
+    getAdminList(): Promise<Array<Principal>>;
     getAllAssetProfiles(): Promise<Array<AssetProfile>>;
     getAllClassifiedNotes(): Promise<Array<ClassifiedNote>>;
     getAllMissionBriefings(): Promise<Array<MissionBriefing>>;
@@ -200,7 +202,9 @@ export interface backendInterface {
     getMissionsByStatus(status: MissionStatus): Promise<Array<Mission>>;
     getThreatAssessment(subjectName: string): Promise<ThreatAssessment>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
+    isAdmin(p: Principal): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
+    removeAdmin(p: Principal): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     saveMissionTemplate(codename: string, status: MissionStatus, threatLevel: ThreatLevel, assignedOperatives: Array<string>, missionType: MissionType, objectives: Array<string>): Promise<void>;
     updateAssetProfile(codename: string, clearanceLevel: ClearanceLevel, specialization: Array<SpecializedSkill>, status: Variant_active_terminated_inactive, bio: string): Promise<void>;

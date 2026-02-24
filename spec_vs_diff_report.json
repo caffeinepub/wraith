@@ -1,88 +1,22 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-24T19:28:19.451Z",
-  "summary": "The diff implements a comprehensive WRAITH Ops Platform covering all four major requirements: Mission Management Dashboard (REQ-1), Intelligence Hub (REQ-2), Field Ops Briefing Tool (REQ-3), and dark classified-ops visual theme (REQ-4). Backend Motoko actor with stable storage types is present. All three frontend modules and supporting components are implemented. The implementation appears largely complete with minor gaps noted below.",
+  "generatedAt": "2026-02-24T20:41:11.795Z",
+  "summary": "The diff shows that backend/main.mo was modified to include the principal tppp7-aedx6-t5lmu-6qnik-e46l6-jbsl2-jmt6r-dhupo-bkdih-s2avm-zqe in an adminPrincipalList using List.fromArray. REQ-8 appears to be substantially implemented: the principal is hardcoded in the backend file. However, the list contains only the new principal with no evidence of the canister deployer or other existing initial admins being preserved alongside it.",
   "missing_requirements": [
     {
-      "requirement": "Missions must be sortable (not just filterable) in the mission list",
-      "reason": "MissionList.tsx implements filtering by status and threat level, but there is no evidence of a sortable column or sort control in the mission list UI. The backend defines sort comparators (compareByLastUpdate, compareByCodename) but no sort UI controls are visible in MissionList.tsx.",
-      "evidence": [
-        "frontend/src/components/MissionList.tsx",
-        "backend/main.mo"
-      ]
-    },
-    {
-      "requirement": "Redaction-style UI components (blacked-out bars for high-sensitivity fields) should appear throughout sensitive views",
-      "reason": "RedactionBar.tsx component exists but there is no evidence it is actually used in any of the three module pages or sensitive field displays — no imports of RedactionBar are visible in the truncated diffs of MissionDashboard, IntelligenceHub, or FieldOpsBriefing pages.",
-      "evidence": [
-        "frontend/src/components/RedactionBar.tsx"
-      ]
-    }
-  ],
-  "hallucinated_features": [
-    {
-      "description": "User profile registration / operative identity setup modal (ProfileSetupModal) with name, callsign, and department fields",
-      "reason": "The build request does not mention any user profile registration or operative identity setup flow. This is an extra feature added beyond the specified requirements.",
-      "evidence": [
-        "frontend/src/components/ProfileSetupModal.tsx",
-        "frontend/src/App.tsx"
-      ]
-    },
-    {
-      "description": "BriefingObjective priority field (high/medium/low) on briefing objectives",
-      "reason": "REQ-3 specifies an objectives list with add/remove capability but does not mention a priority attribute on each objective. The implementation adds a priority enum to BriefingObjective.",
-      "evidence": [
-        "frontend/src/components/BriefingForm.tsx",
-        "backend/main.mo"
-      ]
-    },
-    {
-      "description": "isTemplate flag on Mission records",
-      "reason": "REQ-1 does not mention mission templates. The Mission type in the backend includes an isTemplate boolean field.",
+      "id": "REQ-8",
+      "requirement": "The new principal must be added alongside any existing initial admins (e.g., the canister deployer), not as the sole initial admin.",
+      "reason": "The diff shows adminPrincipalList contains only the new principal. There is no evidence in the truncated diff that the canister deployer or other existing initial admins are preserved in the initial admin list. The constraint explicitly says do not remove or replace any existing initial admins.",
       "evidence": [
         "backend/main.mo"
       ]
     }
   ],
-  "confidence": 0.72,
+  "hallucinated_features": [],
+  "confidence": 0.65,
   "changed_files": [
-    "all_files_summary.json",
     "backend/main.mo",
-    "frontend-file-summaries.txt",
-    "frontend/index.css",
-    "frontend/index.html",
-    "frontend/src/App.tsx",
-    "frontend/src/components/AssetProfileForm.tsx",
-    "frontend/src/components/AssetProfilesSection.tsx",
-    "frontend/src/components/BriefingForm.tsx",
-    "frontend/src/components/BriefingView.tsx",
-    "frontend/src/components/ClassificationBanner.tsx",
-    "frontend/src/components/ClassifiedNoteForm.tsx",
-    "frontend/src/components/EncryptedNotesSection.tsx",
-    "frontend/src/components/FieldReportsLog.tsx",
-    "frontend/src/components/Layout.tsx",
-    "frontend/src/components/MissionDetail.tsx",
-    "frontend/src/components/MissionForm.tsx",
-    "frontend/src/components/MissionList.tsx",
-    "frontend/src/components/Navigation.tsx",
-    "frontend/src/components/ProfileSetupModal.tsx",
-    "frontend/src/components/RedactionBar.tsx",
-    "frontend/src/components/StatusBadge.tsx",
-    "frontend/src/components/ThreatAssessmentForm.tsx",
-    "frontend/src/components/ThreatAssessmentsSection.tsx",
-    "frontend/src/components/ThreatIndicator.tsx",
-    "frontend/src/hooks/useActor.ts",
-    "frontend/src/hooks/useInternetIdentity.ts",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/index.css",
-    "frontend/src/lib/utils.ts",
-    "frontend/src/main.tsx",
-    "frontend/src/pages/FieldOpsBriefing.tsx",
-    "frontend/src/pages/IntelligenceHub.tsx",
-    "frontend/src/pages/MissionDashboard.tsx",
-    "frontend/src/utils/urlParams.ts",
-    "frontend/tailwind.config.js",
     "project_state.json"
   ]
 }

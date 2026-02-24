@@ -176,6 +176,7 @@ export const idlService = IDL.Service({
     ),
   '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+  'addAdmin' : IDL.Func([IDL.Principal], [], []),
   'addMissionFieldReport' : IDL.Func([IDL.Text, IDL.Text], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'createAssetProfile' : IDL.Func(
@@ -234,6 +235,7 @@ export const idlService = IDL.Service({
   'deleteMission' : IDL.Func([IDL.Text], [], []),
   'deleteMissionBriefing' : IDL.Func([IDL.Text], [], []),
   'deleteThreatAssessment' : IDL.Func([IDL.Text], [], []),
+  'getAdminList' : IDL.Func([], [IDL.Vec(IDL.Principal)], ['query']),
   'getAllAssetProfiles' : IDL.Func([], [IDL.Vec(AssetProfile)], ['query']),
   'getAllClassifiedNotes' : IDL.Func([], [IDL.Vec(ClassifiedNote)], ['query']),
   'getAllMissionBriefings' : IDL.Func(
@@ -266,7 +268,9 @@ export const idlService = IDL.Service({
       [IDL.Opt(UserProfile)],
       ['query'],
     ),
+  'isAdmin' : IDL.Func([IDL.Principal], [IDL.Bool], ['query']),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'removeAdmin' : IDL.Func([IDL.Principal], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'saveMissionTemplate' : IDL.Func(
       [
@@ -504,6 +508,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+    'addAdmin' : IDL.Func([IDL.Principal], [], []),
     'addMissionFieldReport' : IDL.Func([IDL.Text, IDL.Text], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'createAssetProfile' : IDL.Func(
@@ -562,6 +567,7 @@ export const idlFactory = ({ IDL }) => {
     'deleteMission' : IDL.Func([IDL.Text], [], []),
     'deleteMissionBriefing' : IDL.Func([IDL.Text], [], []),
     'deleteThreatAssessment' : IDL.Func([IDL.Text], [], []),
+    'getAdminList' : IDL.Func([], [IDL.Vec(IDL.Principal)], ['query']),
     'getAllAssetProfiles' : IDL.Func([], [IDL.Vec(AssetProfile)], ['query']),
     'getAllClassifiedNotes' : IDL.Func(
         [],
@@ -598,7 +604,9 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Opt(UserProfile)],
         ['query'],
       ),
+    'isAdmin' : IDL.Func([IDL.Principal], [IDL.Bool], ['query']),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'removeAdmin' : IDL.Func([IDL.Principal], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'saveMissionTemplate' : IDL.Func(
         [

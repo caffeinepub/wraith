@@ -3,13 +3,14 @@ import { Link, useLocation } from '@tanstack/react-router';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { useQueryClient } from '@tanstack/react-query';
 import { useGetCallerUserProfile } from '../hooks/useQueries';
-import { Shield, Target, FileText, Radio, LogOut, LogIn, Menu, X } from 'lucide-react';
+import { Shield, Target, FileText, Radio, LogOut, LogIn, Menu, X, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
 
 const navItems = [
   { path: '/missions', label: 'MISSION OPS', icon: Target },
   { path: '/intelligence', label: 'INTEL HUB', icon: Radio },
   { path: '/briefings', label: 'FIELD BRIEFINGS', icon: FileText },
+  { path: '/admin', label: 'ADMIN', icon: ShieldCheck },
 ];
 
 export default function Navigation() {
@@ -76,14 +77,19 @@ export default function Navigation() {
           <div className="hidden md:flex items-center gap-1">
             {navItems.map(({ path, label, icon: Icon }) => {
               const isActive = location.pathname === path || location.pathname.startsWith(path + '/');
+              const isAdmin = path === '/admin';
               return (
                 <Link
                   key={path}
                   to={path}
                   className={`flex items-center gap-2 px-3 py-2 text-xs font-mono font-bold tracking-widest transition-all duration-200 border-b-2 ${
                     isActive
-                      ? 'text-amber-ops border-amber-ops text-glow-amber'
-                      : 'text-ops-muted border-transparent hover:text-amber-ops/70 hover:border-amber-ops/40'
+                      ? isAdmin
+                        ? 'text-red-ops border-red-ops'
+                        : 'text-amber-ops border-amber-ops text-glow-amber'
+                      : isAdmin
+                        ? 'text-red-ops/50 border-transparent hover:text-red-ops/80 hover:border-red-ops/40'
+                        : 'text-ops-muted border-transparent hover:text-amber-ops/70 hover:border-amber-ops/40'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -139,6 +145,7 @@ export default function Navigation() {
           <div className="md:hidden border-t border-ops-border/40 bg-sidebar">
             {navItems.map(({ path, label, icon: Icon }) => {
               const isActive = location.pathname === path;
+              const isAdmin = path === '/admin';
               return (
                 <Link
                   key={path}
@@ -146,8 +153,12 @@ export default function Navigation() {
                   onClick={() => setMobileOpen(false)}
                   className={`flex items-center gap-3 px-4 py-3 text-xs font-mono font-bold tracking-widest border-l-2 transition-all ${
                     isActive
-                      ? 'text-amber-ops border-amber-ops bg-amber-ops/5'
-                      : 'text-ops-muted border-transparent hover:text-amber-ops/70'
+                      ? isAdmin
+                        ? 'text-red-ops border-red-ops bg-red-ops/5'
+                        : 'text-amber-ops border-amber-ops bg-amber-ops/5'
+                      : isAdmin
+                        ? 'text-red-ops/50 border-transparent hover:text-red-ops/70'
+                        : 'text-ops-muted border-transparent hover:text-amber-ops/70'
                   }`}
                 >
                   <Icon className="w-4 h-4" />

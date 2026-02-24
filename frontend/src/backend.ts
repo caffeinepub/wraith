@@ -272,6 +272,7 @@ export interface backendInterface {
     _caffeineStorageRefillCashier(refillInformation: _CaffeineStorageRefillInformation | null): Promise<_CaffeineStorageRefillResult>;
     _caffeineStorageUpdateGatewayPrincipals(): Promise<void>;
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
+    addAdmin(p: Principal): Promise<void>;
     addMissionFieldReport(codename: string, reportContent: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     createAssetProfile(codename: string, clearanceLevel: ClearanceLevel, specialization: Array<SpecializedSkill>, status: Variant_active_terminated_inactive, bio: string): Promise<void>;
@@ -284,6 +285,7 @@ export interface backendInterface {
     deleteMission(codename: string): Promise<void>;
     deleteMissionBriefing(operationCodename: string): Promise<void>;
     deleteThreatAssessment(subjectName: string): Promise<void>;
+    getAdminList(): Promise<Array<Principal>>;
     getAllAssetProfiles(): Promise<Array<AssetProfile>>;
     getAllClassifiedNotes(): Promise<Array<ClassifiedNote>>;
     getAllMissionBriefings(): Promise<Array<MissionBriefing>>;
@@ -300,7 +302,9 @@ export interface backendInterface {
     getMissionsByStatus(status: MissionStatus): Promise<Array<Mission>>;
     getThreatAssessment(subjectName: string): Promise<ThreatAssessment>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
+    isAdmin(p: Principal): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
+    removeAdmin(p: Principal): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     saveMissionTemplate(codename: string, status: MissionStatus, threatLevel: ThreatLevel, assignedOperatives: Array<string>, missionType: MissionType, objectives: Array<string>): Promise<void>;
     updateAssetProfile(codename: string, clearanceLevel: ClearanceLevel, specialization: Array<SpecializedSkill>, status: Variant_active_terminated_inactive, bio: string): Promise<void>;
@@ -407,6 +411,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor._initializeAccessControlWithSecret(arg0);
+            return result;
+        }
+    }
+    async addAdmin(arg0: Principal): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.addAdmin(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.addAdmin(arg0);
             return result;
         }
     }
@@ -575,6 +593,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.deleteThreatAssessment(arg0);
+            return result;
+        }
+    }
+    async getAdminList(): Promise<Array<Principal>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAdminList();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAdminList();
             return result;
         }
     }
@@ -802,6 +834,20 @@ export class Backend implements backendInterface {
             return from_candid_opt_n67(this._uploadFile, this._downloadFile, result);
         }
     }
+    async isAdmin(arg0: Principal): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.isAdmin(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.isAdmin(arg0);
+            return result;
+        }
+    }
     async isCallerAdmin(): Promise<boolean> {
         if (this.processError) {
             try {
@@ -813,6 +859,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.isCallerAdmin();
+            return result;
+        }
+    }
+    async removeAdmin(arg0: Principal): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.removeAdmin(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.removeAdmin(arg0);
             return result;
         }
     }

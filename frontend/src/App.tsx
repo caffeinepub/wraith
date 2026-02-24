@@ -7,6 +7,7 @@ import ProfileSetupModal from './components/ProfileSetupModal';
 import MissionDashboard from './pages/MissionDashboard';
 import IntelligenceHub from './pages/IntelligenceHub';
 import FieldOpsBriefing from './pages/FieldOpsBriefing';
+import AdminPanel from './pages/AdminPanel';
 import { Shield, LogIn, Loader2 } from 'lucide-react';
 
 // ─── Login Screen ─────────────────────────────────────────────────────────────
@@ -175,12 +176,19 @@ const briefingsRoute = createRoute({
   component: FieldOpsBriefing,
 });
 
+const adminRoute = createRoute({
+  getParentRoute: () => layoutRoute,
+  path: '/admin',
+  component: AdminPanel,
+});
+
 const routeTree = rootRoute.addChildren([
   layoutRoute.addChildren([
     indexRoute,
     missionsRoute,
     intelligenceRoute,
     briefingsRoute,
+    adminRoute,
   ]),
 ]);
 
