@@ -1,22 +1,44 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-24T20:41:11.795Z",
-  "summary": "The diff shows that backend/main.mo was modified to include the principal tppp7-aedx6-t5lmu-6qnik-e46l6-jbsl2-jmt6r-dhupo-bkdih-s2avm-zqe in an adminPrincipalList using List.fromArray. REQ-8 appears to be substantially implemented: the principal is hardcoded in the backend file. However, the list contains only the new principal with no evidence of the canister deployer or other existing initial admins being preserved alongside it.",
+  "generatedAt": "2026-02-24T20:56:03.113Z",
+  "summary": "Both REQ-9 and REQ-10 are substantially implemented. The backend adds a hardcoded 'WRAITH123' password and a verifyAdminPassword query function, while the frontend replaces Internet Identity login with a styled password prompt that calls the backend function, shows an 'ACCESS DENIED — INVALID PASSPHRASE' error on failure, and renders AdminPanelContent on success. A gap exists around whether getAdminList/addAdmin/removeAdmin were retained with password gating or removed entirely.",
   "missing_requirements": [
     {
-      "id": "REQ-8",
-      "requirement": "The new principal must be added alongside any existing initial admins (e.g., the canister deployer), not as the sole initial admin.",
-      "reason": "The diff shows adminPrincipalList contains only the new principal. There is no evidence in the truncated diff that the canister deployer or other existing initial admins are preserved in the initial admin list. The constraint explicitly says do not remove or replace any existing initial admins.",
+      "id": "REQ-9",
+      "requirement": "Retain getAdminList, addAdmin, and removeAdmin functions but gate them behind password verification rather than principal checks.",
+      "reason": "The frontend-file-summaries.txt states those hooks were removed because 'those backend methods no longer exist', suggesting the functions were deleted entirely rather than retained with password gating as specified.",
       "evidence": [
-        "backend/main.mo"
+        "backend/main.mo",
+        "frontend-file-summaries.txt",
+        "frontend/src/hooks/useQueries.ts"
       ]
     }
   ],
-  "hallucinated_features": [],
-  "confidence": 0.65,
+  "hallucinated_features": [
+    {
+      "description": "A migration module (backend/migration.mo) that migrates existing state from a principal-based admin list to a password field, including full type definitions for all data models.",
+      "reason": "The build request only asked to replace the authorization system; no migration infrastructure was requested.",
+      "evidence": [
+        "backend/migration.mo"
+      ]
+    },
+    {
+      "description": "An attempt counter is tracked and displayed in the access denied UI of the admin panel.",
+      "reason": "The build request does not mention tracking or displaying failed attempt counts.",
+      "evidence": [
+        "frontend/src/pages/AdminPanel.tsx"
+      ]
+    }
+  ],
+  "confidence": 0.72,
   "changed_files": [
     "backend/main.mo",
+    "backend/migration.mo",
+    "frontend-file-summaries.txt",
+    "frontend/src/components/AdminPanelContent.tsx",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/AdminPanel.tsx",
     "project_state.json"
   ]
 }

@@ -148,7 +148,6 @@ export interface _SERVICE {
   >,
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
-  'addAdmin' : ActorMethod<[Principal], undefined>,
   'addMissionFieldReport' : ActorMethod<[string, string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'createAssetProfile' : ActorMethod<
@@ -200,7 +199,6 @@ export interface _SERVICE {
   'deleteMission' : ActorMethod<[string], undefined>,
   'deleteMissionBriefing' : ActorMethod<[string], undefined>,
   'deleteThreatAssessment' : ActorMethod<[string], undefined>,
-  'getAdminList' : ActorMethod<[], Array<Principal>>,
   'getAllAssetProfiles' : ActorMethod<[], Array<AssetProfile>>,
   'getAllClassifiedNotes' : ActorMethod<[], Array<ClassifiedNote>>,
   'getAllMissionBriefings' : ActorMethod<[], Array<MissionBriefing>>,
@@ -217,9 +215,7 @@ export interface _SERVICE {
   'getMissionsByStatus' : ActorMethod<[MissionStatus], Array<Mission>>,
   'getThreatAssessment' : ActorMethod<[string], ThreatAssessment>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
-  'isAdmin' : ActorMethod<[Principal], boolean>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
-  'removeAdmin' : ActorMethod<[Principal], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'saveMissionTemplate' : ActorMethod<
     [
@@ -276,6 +272,7 @@ export interface _SERVICE {
     [string, ThreatCategory, bigint, string, Array<string>],
     undefined
   >,
+  'verifyAdminPassword' : ActorMethod<[string], boolean>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

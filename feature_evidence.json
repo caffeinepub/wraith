@@ -1,4 +1,25 @@
 {
   "kind": "feature_evidence_report",
-  "features": []
+  "features": [
+    {
+      "featureId": "feature-replace-the-internet-identity-login-requirement-on-the-admin-panel-page-with-a-password-entry-screen-when-the-user-navigates-to-admin-display-a-styled-password-input-form-matching-the-wraith-dark-classified-ops-theme-prompting-for-the-access-passphrase-on-correct-entry-of-wraith123-verified-via-the-backend-verifyadminpassword-call-grant-access-to-the-adminpanelcontent-component-on-incorrect-entry-display-a-styled-access-denied-invalid-passphrase-error-do-not-require-the-user-to-be-logged-in-via-internet-identity-to-access-the-admin-panel",
+      "featureTitle": "Replace the Internet Identity login requirement on the Admin Panel page with a password entry screen. When the user navigates to /admin, display a styled password input form (matching the WRAITH dark classified-ops theme) prompting for the access passphrase. On correct entry of 'WRAITH123' (verified via the backend `verifyAdminPassword` call), grant access to the AdminPanelContent component. On incorrect entry, display a styled 'ACCESS DENIED — INVALID PASSPHRASE' error. Do not require the user to be logged in via Internet Identity to access the admin panel.",
+      "files": [
+        "frontend/src/pages/AdminPanel.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-10"
+      ],
+      "confidence": "high"
+    }
+  ]
 }

@@ -17,7 +17,6 @@ import type {
   UserProfile,
 } from '../backend';
 import { Variant_active_terminated_inactive } from '../backend';
-import type { Principal } from '@icp-sdk/core/principal';
 
 // ─── User Profile ────────────────────────────────────────────────────────────
 
@@ -52,71 +51,6 @@ export function useSaveCallerUserProfile() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
-    },
-  });
-}
-
-// ─── Admin ───────────────────────────────────────────────────────────────────
-
-export function useIsCallerAdmin() {
-  const { actor, isFetching: actorFetching } = useActor();
-
-  const query = useQuery<boolean>({
-    queryKey: ['isCallerAdmin'],
-    queryFn: async () => {
-      if (!actor) return false;
-      return actor.isCallerAdmin();
-    },
-    enabled: !!actor && !actorFetching,
-    retry: false,
-  });
-
-  return {
-    ...query,
-    isLoading: actorFetching || query.isLoading,
-    isFetched: !!actor && query.isFetched,
-  };
-}
-
-export function useGetAdminList() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<Principal[]>({
-    queryKey: ['adminList'],
-    queryFn: async () => {
-      if (!actor) return [];
-      return actor.getAdminList();
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
-
-export function useAddAdmin() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (principal: Principal) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.addAdmin(principal);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminList'] });
-    },
-  });
-}
-
-export function useRemoveAdmin() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (principal: Principal) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.removeAdmin(principal);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminList'] });
     },
   });
 }
@@ -592,6 +526,51 @@ export function useDeleteMissionBriefing() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['missionBriefings'] });
+    },
+  });
+}
+
+// ─── Mission Templates ───────────────────────────────────────────────────────
+
+export function useGetMissionTemplates() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<Mission[]>({
+    queryKey: ['missionTemplates'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getMissionTemplates();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useSaveMissionTemplate() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (params: {
+      codename: string;
+      status: MissionStatus;
+      threatLevel: ThreatLevel;
+      assignedOperatives: string[];
+      missionType: MissionType;
+      objectives: string[];
+    }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.saveMissionTemplate(
+        params.codename,
+        params.status,
+        params.threatLevel,
+        params.assignedOperatives,
+        params.missionType,
+        params.objectives
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['missionTemplates'] });
+      queryClient.invalidateQueries({ queryKey: ['missions'] });
     },
   });
 }

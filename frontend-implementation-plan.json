@@ -1,6 +1,25 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Pre-authorize principal tppp7-aedx6-t5lmu-6qnik-e46l6-jbsl2-jmt6r-dhupo-bkdih-s2avm-zqe as initial admin",
-  "requirements": []
+  "title": "Replace principal-based admin access with password authentication (WRAITH123)",
+  "requirements": [
+    {
+      "id": "REQ-10",
+      "summary": "Replace Internet Identity login requirement on Admin Panel with password entry screen using 'WRAITH123' passphrase",
+      "acceptanceCriteria": [
+        "Navigating to /admin shows a password prompt screen instead of redirecting to Internet Identity login.",
+        "Entering 'WRAITH123' and submitting calls the backend `verifyAdminPassword` function and, on success, renders the AdminPanelContent.",
+        "Entering an incorrect password displays a styled 'ACCESS DENIED — INVALID PASSPHRASE' message without revealing the correct password.",
+        "The password prompt UI matches the WRAITH dark classified-ops theme (near-black background, amber/red accents, monospaced typography).",
+        "Successful password entry persists the authenticated state for the session so the user is not prompted again on re-render."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/AdminPanel.tsx",
+          "operation": "modify",
+          "description": "Replace the current authentication check (Internet Identity + isCallerAdmin) with a password-based authentication flow. Display a full-screen password prompt form styled with WRAITH dark theme (near-black background, amber/red accents, monospace font). On form submission, call the backend `verifyAdminPassword` function. On success, store the authenticated state in React state or sessionStorage and render AdminPanelContent. On failure, display 'ACCESS DENIED — INVALID PASSPHRASE' error message. Remove all Internet Identity login dependencies and admin role checks from this page."
+        }
+      ]
+    }
+  ]
 }

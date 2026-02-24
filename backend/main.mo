@@ -1,24 +1,22 @@
-import Array "mo:core/Array";
 import Text "mo:core/Text";
 import Time "mo:core/Time";
-import List "mo:core/List";
 import Map "mo:core/Map";
 import Order "mo:core/Order";
 import Runtime "mo:core/Runtime";
 import Principal "mo:core/Principal";
+import Migration "migration";
+import MixinStorage "blob-storage/Mixin";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
-import MixinStorage "blob-storage/Mixin";
 
+(with migration = Migration.run)
 actor {
   include MixinStorage();
 
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
-  let adminPrincipalList = List.fromArray([
-    Principal.fromText("tppp7-aedx6-t5lmu-6qnik-e46l6-jbsl2-jmt6r-dhupo-bkdih-s2avm-zqe")
-  ]);
+  let adminPassword = "WRAITH123";
 
   type MissionStatus = { #active; #compromised; #completed; #aborted };
   type ThreatLevel = { #low; #elevated; #critical };
@@ -145,41 +143,9 @@ actor {
   let missionBriefings = Map.empty<Text, MissionBriefing>();
   let userProfiles = Map.empty<Principal, UserProfile>();
 
-  // Admin List Functions
-
-  public query ({ caller }) func getAdminList() : async [Principal] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can view the admin list");
-    };
-    adminPrincipalList.toArray();
-  };
-
-  public query ({ caller }) func isAdmin(p : Principal) : async Bool {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only authenticated users can query admin status");
-    };
-    adminPrincipalList.contains(p);
-  };
-
-  public shared ({ caller }) func addAdmin(p : Principal) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Must be admin to add other admins");
-    };
-    if (adminPrincipalList.contains(p)) { Runtime.trap("Principal " # p.toText() # " is already admin") };
-    adminPrincipalList.add(p);
-  };
-
-  public shared ({ caller }) func removeAdmin(p : Principal) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Must be admin to remove admins");
-    };
-    if (not adminPrincipalList.contains(p)) { Runtime.trap("Principal " # p.toText() # " already is no admin") };
-
-    let filtered = adminPrincipalList.toArray().filter(func(principal) { principal != p });
-    adminPrincipalList.clear();
-    for (principal in filtered.values()) {
-      adminPrincipalList.add(principal);
-    };
+  // Password Management Functions
+  public query ({ caller }) func verifyAdminPassword(password : Text) : async Bool {
+    password == adminPassword;
   };
 
   // User Profile Functions
@@ -211,7 +177,7 @@ actor {
     threatLevel : ThreatLevel,
     assignedOperatives : [Text],
     missionType : MissionType,
-    objectives : [Text]
+    objectives : [Text],
   ) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can create missions");
@@ -248,7 +214,7 @@ actor {
     threatLevel : ThreatLevel,
     assignedOperatives : [Text],
     missionType : MissionType,
-    objectives : [Text]
+    objectives : [Text],
   ) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can update missions");
@@ -428,7 +394,7 @@ actor {
     threatCategory : ThreatCategory,
     riskScore : Nat,
     summary : Text,
-    linkedMissions : [Text]
+    linkedMissions : [Text],
   ) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can create threat assessments");
@@ -450,7 +416,7 @@ actor {
     threatCategory : ThreatCategory,
     riskScore : Nat,
     summary : Text,
-    linkedMissions : [Text]
+    linkedMissions : [Text],
   ) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can update threat assessments");
@@ -586,7 +552,7 @@ actor {
     hvtProfiles : [HVTProfile],
     exfilRoutes : Text,
     rulesOfEngagement : Text,
-    classificationLevel : ClearanceLevel
+    classificationLevel : ClearanceLevel,
   ) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can create mission briefings");
@@ -614,7 +580,7 @@ actor {
     hvtProfiles : [HVTProfile],
     exfilRoutes : Text,
     rulesOfEngagement : Text,
-    classificationLevel : ClearanceLevel
+    classificationLevel : ClearanceLevel,
   ) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can update mission briefings");
@@ -674,14 +640,13 @@ actor {
     Time.now();
   };
 
-  // Document Template Functions
   public shared ({ caller }) func saveMissionTemplate(
     codename : Text,
     status : MissionStatus,
     threatLevel : ThreatLevel,
     assignedOperatives : [Text],
     missionType : MissionType,
-    objectives : [Text]
+    objectives : [Text],
   ) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can save mission templates");
@@ -713,20 +678,5 @@ actor {
       Runtime.trap("Unauthorized: Only users can view mission templates");
     };
     missions.values().filter(func(m) { m.isTemplate }).toArray().sort(Mission.compareByCodename);
-  };
-
-  // Custom sorting functions for missions
-  func getFilteredAndSortedMissions(filterFunc : Mission -> Bool, sortFunc : ([Mission]) -> [Mission]) : [Mission] {
-    let resultList = List.empty<Mission>();
-    for (mission in missions.values()) {
-      if (filterFunc(mission)) {
-        resultList.add(mission);
-      };
-    };
-    sortFunc(resultList.toArray());
-  };
-
-  func sortByCodename(array : [Mission]) : [Mission] {
-    array.sort(Mission.compareByCodename);
   };
 };

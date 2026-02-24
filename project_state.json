@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 7,
+  "projectStateVersion": 9,
   "summary": "Building a WRAITH-themed classified intelligence app combining: (1) Mission Management Dashboard for tracking covert missions/threats/field reports, (2) Intelligence Hub with asset profiles/threat assessments/encrypted notes, and (4) Field Ops Briefing Tool for building and displaying mission briefings with objectives and HVT profiles.",
   "architectural_notes": [
     "Themed as a classified/clandestine operations center with dark spy-thriller aesthetic",
@@ -56,6 +56,14 @@
         "REQ-7"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-replace-the-internet-identity-login-requirement-on-the-admin-panel-page-with-a-password-entry-screen-when-the-user-navigates-to-admin-display-a-styled-password-input-form-matching-the-wraith-dark-classified-ops-theme-prompting-for-the-access-passphrase-on-correct-entry-of-wraith123-verified-via-the-backend-verifyadminpassword-call-grant-access-to-the-adminpanelcontent-component-on-incorrect-entry-display-a-styled-access-denied-invalid-passphrase-error-do-not-require-the-user-to-be-logged-in-via-internet-identity-to-access-the-admin-panel",
+      "title": "Replace the Internet Identity login requirement on the Admin Panel page with a password entry screen. When the user navigates to /admin, display a styled password input form (matching the WRAITH dark classified-ops theme) prompting for the access passphrase. On correct entry of 'WRAITH123' (verified via the backend `verifyAdminPassword` call), grant access to the AdminPanelContent component. On incorrect entry, display a styled 'ACCESS DENIED — INVALID PASSPHRASE' error. Do not require the user to be logged in via Internet Identity to access the admin panel.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -102,6 +110,20 @@
       "summary": "Hardcode principal `tppp7-aedx6-t5lmu-6qnik-e46l6-jbsl2-jmt6r-dhupo-bkdih-s2avm-zqe` as an initial admin in the backend admin list, alongside any existing initial admins (e.g., the canister deployer), so that this principal has admin access immediately upon deployment without needing to be added manually.",
       "reqIds": [
         "REQ-8"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Replace principal-based admin access with password authentication. The admin panel should be accessible by entering the password 'WRAITH123' instead of requiring a recognized admin principal.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Replace the backend's principal-based admin authorization system with a password-based system. The backend must store a hardcoded or settable admin password (initially 'WRAITH123'). Expose a query or update function `verifyAdminPassword(password: Text) : Bool` that returns true if the provided password matches. Remove or bypass the existing `isAdmin(caller)` principal check for admin panel access. Retain `getAdminList`, `addAdmin`, and `removeAdmin` functions but gate them behind password verification rather than principal checks.",
+      "reqIds": [
+        "REQ-9"
       ],
       "status": "pending"
     }
