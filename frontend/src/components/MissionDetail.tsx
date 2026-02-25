@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mission } from '../backend';
+import { Mission, FieldReport } from '../backend';
 import { formatTimestamp, missionTypeLabel } from '../lib/utils';
 import StatusBadge from './StatusBadge';
 import ThreatIndicator from './ThreatIndicator';
@@ -26,7 +26,11 @@ export default function MissionDetail({ mission, onBack }: MissionDetailProps) {
         </div>
         <div className="ops-card p-4">
           <h3 className="text-amber-ops font-display text-sm tracking-widest mb-4">EDIT MISSION: {mission.codename}</h3>
-          <MissionForm mission={mission} onClose={() => setEditing(false)} />
+          <MissionForm
+            existingMission={mission}
+            onSuccess={() => setEditing(false)}
+            onCancel={() => setEditing(false)}
+          />
         </div>
       </div>
     );
@@ -102,7 +106,7 @@ export default function MissionDetail({ mission, onBack }: MissionDetailProps) {
         )}
 
         {/* Field Reports */}
-        <FieldReportsLog codename={mission.codename} reports={mission.fieldReports} />
+        <FieldReportsLog mission={mission} />
       </div>
     </div>
   );

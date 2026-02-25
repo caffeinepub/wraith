@@ -1,207 +1,275 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Mission, MissionStatus, ThreatLevel, MissionType } from '../backend';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Plus, Trash2, Loader2 } from 'lucide-react';
+import type { Mission } from '../backend';
+import { MissionStatus, ThreatLevel, MissionType } from '../backend';
 import { useCreateMission, useUpdateMission } from '../hooks/useQueries';
-import { Plus, Trash2, Loader2, X } from 'lucide-react';
 
 interface MissionFormProps {
-  mission?: Mission;
-  onClose: () => void;
+  existingMission?: Mission;
+  onSuccess: () => void;
+  onCancel: () => void;
 }
 
-export default function MissionForm({ mission, onClose }: MissionFormProps) {
-  const [codename, setCodename] = useState(mission?.codename || '');
-  const [status, setStatus] = useState<MissionStatus>(mission?.status || MissionStatus.active);
-  const [threatLevel, setThreatLevel] = useState<ThreatLevel>(mission?.threatLevel || ThreatLevel.low);
-  const [missionType, setMissionType] = useState<MissionType>(mission?.missionType || MissionType.recon);
-  const [operativeInput, setOperativeInput] = useState('');
-  const [operatives, setOperatives] = useState<string[]>(mission?.assignedOperatives || []);
-  const [objectiveInput, setObjectiveInput] = useState('');
-  const [objectives, setObjectives] = useState<string[]>(mission?.objectives || []);
+export default function MissionForm({ existingMission, onSuccess, onCancel }: MissionFormProps) {
+  const [codename, setCodename] = useState('');
+  const [status, setStatus] = useState<MissionStatus>(MissionStatus.active);
+  const [threatLevel, setThreatLevel] = useState<ThreatLevel>(ThreatLevel.low);
+  const [missionType, setMissionType] = useState<MissionType>(MissionType.recon);
+  const [assignedOperatives, setAssignedOperatives] = useState<string[]>(['']);
+  const [objectives, setObjectives] = useState<string[]>(['']);
 
-  const createMission = useCreateMission();
-  const updateMission = useUpdateMission();
-  const isEditing = !!mission;
-  const isPending = createMission.isPending || updateMission.isPending;
+  const createMutation = useCreateMission();
+  const updateMutation = useUpdateMission();
 
-  const addOperative = () => {
-    if (operativeInput.trim() && !operatives.includes(operativeInput.trim().toUpperCase())) {
-      setOperatives([...operatives, operativeInput.trim().toUpperCase()]);
-      setOperativeInput('');
+  const isEditing = !!existingMission;
+  const isPending = createMutation.isPending || updateMutation.isPending;
+
+  useEffect(() => {
+    if (existingMission) {
+      setCodename(existingMission.codename);
+      setStatus(existingMission.status as MissionStatus);
+      setThreatLevel(existingMission.threatLevel as ThreatLevel);
+      setMissionType(existingMission.missionType as MissionType);
+      setAssignedOperatives(
+        existingMission.assignedOperatives.length > 0
+          ? [...existingMission.assignedOperatives]
+          : [''],
+      );
+      setObjectives(
+        existingMission.objectives.length > 0 ? [...existingMission.objectives] : [''],
+      );
     }
+  }, [existingMission]);
+
+  const handleAddOperative = () => setAssignedOperatives([...assignedOperatives, '']);
+  const handleRemoveOperative = (i: number) =>
+    setAssignedOperatives(assignedOperatives.filter((_, idx) => idx !== i));
+  const handleOperativeChange = (i: number, val: string) => {
+    const updated = [...assignedOperatives];
+    updated[i] = val;
+    setAssignedOperatives(updated);
   };
 
-  const addObjective = () => {
-    if (objectiveInput.trim()) {
-      setObjectives([...objectives, objectiveInput.trim()]);
-      setObjectiveInput('');
-    }
+  const handleAddObjective = () => setObjectives([...objectives, '']);
+  const handleRemoveObjective = (i: number) =>
+    setObjectives(objectives.filter((_, idx) => idx !== i));
+  const handleObjectiveChange = (i: number, val: string) => {
+    const updated = [...objectives];
+    updated[i] = val;
+    setObjectives(updated);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!codename.trim()) return;
 
     const params = {
-      codename: codename.trim().toUpperCase(),
+      codename,
       status,
       threatLevel,
-      assignedOperatives: operatives,
+      assignedOperatives: assignedOperatives.filter(Boolean),
       missionType,
-      objectives,
+      objectives: objectives.filter(Boolean),
     };
 
     try {
       if (isEditing) {
-        await updateMission.mutateAsync({ ...params, codename: mission.codename });
+        await updateMutation.mutateAsync(params);
       } else {
-        await createMission.mutateAsync(params);
+        await createMutation.mutateAsync(params);
       }
-      onClose();
+      onSuccess();
     } catch (err) {
-      // error shown below
+      console.error('Mission form error:', err);
     }
   };
 
-  const error = createMission.error || updateMission.error;
-
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-1">
-          <Label className="text-amber-ops text-xs font-mono tracking-widest">OPERATION CODENAME *</Label>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label className="text-ops-muted text-xs uppercase tracking-widest">Codename</Label>
           <Input
             value={codename}
             onChange={(e) => setCodename(e.target.value)}
-            placeholder="e.g. IRON GHOST"
-            disabled={isEditing}
-            className="ops-input bg-ops-bg border-ops-border/60 text-foreground font-mono text-sm rounded-none focus:border-amber-ops/70 uppercase"
+            disabled={isEditing || isPending}
             required
+            className="bg-ops-surface border-ops-border text-ops-text"
+            placeholder="OPERATION NIGHTFALL"
           />
         </div>
 
-        <div className="space-y-1">
-          <Label className="text-amber-ops text-xs font-mono tracking-widest">MISSION TYPE</Label>
-          <Select value={missionType} onValueChange={(v) => setMissionType(v as MissionType)}>
-            <SelectTrigger className="ops-input bg-ops-bg border-ops-border/60 text-foreground font-mono text-sm rounded-none">
+        <div className="space-y-2">
+          <Label className="text-ops-muted text-xs uppercase tracking-widest">Status</Label>
+          <Select
+            value={status}
+            onValueChange={(v) => setStatus(v as MissionStatus)}
+            disabled={isPending}
+          >
+            <SelectTrigger className="bg-ops-surface border-ops-border text-ops-text">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-ops-surface border-ops-border/60 rounded-none">
-              <SelectItem value={MissionType.recon} className="font-mono text-xs">RECON</SelectItem>
-              <SelectItem value={MissionType.cyber} className="font-mono text-xs">CYBER</SelectItem>
-              <SelectItem value={MissionType.counterTerror} className="font-mono text-xs">COUNTER-TERROR</SelectItem>
-              <SelectItem value={MissionType.inPersonOp} className="font-mono text-xs">IN-PERSON OP</SelectItem>
+            <SelectContent className="bg-ops-surface border-ops-border">
+              <SelectItem value={MissionStatus.active}>Active</SelectItem>
+              <SelectItem value={MissionStatus.compromised}>Compromised</SelectItem>
+              <SelectItem value={MissionStatus.completed}>Completed</SelectItem>
+              <SelectItem value={MissionStatus.aborted}>Aborted</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
-        <div className="space-y-1">
-          <Label className="text-amber-ops text-xs font-mono tracking-widest">STATUS</Label>
-          <Select value={status} onValueChange={(v) => setStatus(v as MissionStatus)}>
-            <SelectTrigger className="ops-input bg-ops-bg border-ops-border/60 text-foreground font-mono text-sm rounded-none">
+        <div className="space-y-2">
+          <Label className="text-ops-muted text-xs uppercase tracking-widest">Threat Level</Label>
+          <Select
+            value={threatLevel}
+            onValueChange={(v) => setThreatLevel(v as ThreatLevel)}
+            disabled={isPending}
+          >
+            <SelectTrigger className="bg-ops-surface border-ops-border text-ops-text">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-ops-surface border-ops-border/60 rounded-none">
-              <SelectItem value={MissionStatus.active} className="font-mono text-xs text-green-ops">ACTIVE</SelectItem>
-              <SelectItem value={MissionStatus.compromised} className="font-mono text-xs text-red-ops">COMPROMISED</SelectItem>
-              <SelectItem value={MissionStatus.completed} className="font-mono text-xs text-blue-400">COMPLETED</SelectItem>
-              <SelectItem value={MissionStatus.aborted} className="font-mono text-xs text-ops-muted">ABORTED</SelectItem>
+            <SelectContent className="bg-ops-surface border-ops-border">
+              <SelectItem value={ThreatLevel.low}>Low</SelectItem>
+              <SelectItem value={ThreatLevel.elevated}>Elevated</SelectItem>
+              <SelectItem value={ThreatLevel.critical}>Critical</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
-        <div className="space-y-1">
-          <Label className="text-amber-ops text-xs font-mono tracking-widest">THREAT LEVEL</Label>
-          <Select value={threatLevel} onValueChange={(v) => setThreatLevel(v as ThreatLevel)}>
-            <SelectTrigger className="ops-input bg-ops-bg border-ops-border/60 text-foreground font-mono text-sm rounded-none">
+        <div className="space-y-2">
+          <Label className="text-ops-muted text-xs uppercase tracking-widest">Mission Type</Label>
+          <Select
+            value={missionType}
+            onValueChange={(v) => setMissionType(v as MissionType)}
+            disabled={isPending}
+          >
+            <SelectTrigger className="bg-ops-surface border-ops-border text-ops-text">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-ops-surface border-ops-border/60 rounded-none">
-              <SelectItem value={ThreatLevel.low} className="font-mono text-xs text-amber-ops">LOW</SelectItem>
-              <SelectItem value={ThreatLevel.elevated} className="font-mono text-xs text-orange-400">ELEVATED</SelectItem>
-              <SelectItem value={ThreatLevel.critical} className="font-mono text-xs text-red-ops">CRITICAL</SelectItem>
+            <SelectContent className="bg-ops-surface border-ops-border">
+              <SelectItem value={MissionType.recon}>Recon</SelectItem>
+              <SelectItem value={MissionType.cyber}>Cyber</SelectItem>
+              <SelectItem value={MissionType.counterTerror}>Counter-Terror</SelectItem>
+              <SelectItem value={MissionType.inPersonOp}>In-Person Op</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
 
-      {/* Operatives */}
+      {/* Assigned Operatives */}
       <div className="space-y-2">
-        <Label className="text-amber-ops text-xs font-mono tracking-widest">ASSIGNED OPERATIVES</Label>
-        <div className="flex gap-2">
-          <Input
-            value={operativeInput}
-            onChange={(e) => setOperativeInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addOperative())}
-            placeholder="Operative callsign"
-            className="ops-input bg-ops-bg border-ops-border/60 text-foreground font-mono text-sm rounded-none focus:border-amber-ops/70"
-          />
-          <Button type="button" onClick={addOperative} variant="outline" size="icon"
-            className="border-amber-ops/40 text-amber-ops hover:bg-amber-ops/10 rounded-none flex-shrink-0">
-            <Plus className="w-4 h-4" />
+        <div className="flex items-center justify-between">
+          <Label className="text-ops-muted text-xs uppercase tracking-widest">
+            Assigned Operatives
+          </Label>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleAddOperative}
+            disabled={isPending}
+            className="border-ops-accent text-ops-accent hover:bg-ops-accent/10 text-xs"
+          >
+            <Plus className="w-3 h-3 mr-1" /> Add
           </Button>
         </div>
-        <div className="flex flex-wrap gap-1">
-          {operatives.map((op) => (
-            <span key={op} className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-ops/10 border border-amber-ops/30 text-amber-ops text-xs font-mono">
-              {op}
-              <button type="button" onClick={() => setOperatives(operatives.filter(o => o !== op))}>
-                <X className="w-3 h-3 hover:text-red-ops" />
-              </button>
-            </span>
-          ))}
-        </div>
+        {assignedOperatives.map((op, i) => (
+          <div key={i} className="flex gap-2">
+            <Input
+              value={op}
+              onChange={(e) => handleOperativeChange(i, e.target.value)}
+              disabled={isPending}
+              placeholder={`Operative ${i + 1} codename`}
+              className="bg-ops-surface border-ops-border text-ops-text flex-1"
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => handleRemoveOperative(i)}
+              disabled={isPending || assignedOperatives.length <= 1}
+              className="text-ops-danger hover:bg-ops-danger/10"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        ))}
       </div>
 
       {/* Objectives */}
       <div className="space-y-2">
-        <Label className="text-amber-ops text-xs font-mono tracking-widest">OBJECTIVES</Label>
-        <div className="flex gap-2">
-          <Input
-            value={objectiveInput}
-            onChange={(e) => setObjectiveInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addObjective())}
-            placeholder="Add mission objective"
-            className="ops-input bg-ops-bg border-ops-border/60 text-foreground font-mono text-sm rounded-none focus:border-amber-ops/70"
-          />
-          <Button type="button" onClick={addObjective} variant="outline" size="icon"
-            className="border-amber-ops/40 text-amber-ops hover:bg-amber-ops/10 rounded-none flex-shrink-0">
-            <Plus className="w-4 h-4" />
+        <div className="flex items-center justify-between">
+          <Label className="text-ops-muted text-xs uppercase tracking-widest">Objectives</Label>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleAddObjective}
+            disabled={isPending}
+            className="border-ops-accent text-ops-accent hover:bg-ops-accent/10 text-xs"
+          >
+            <Plus className="w-3 h-3 mr-1" /> Add
           </Button>
         </div>
-        <div className="space-y-1">
-          {objectives.map((obj, i) => (
-            <div key={i} className="flex items-center gap-2 bg-ops-bg/50 border border-ops-border/40 px-2 py-1">
-              <span className="text-amber-ops text-xs font-mono">{String(i + 1).padStart(2, '0')}.</span>
-              <span className="text-foreground text-xs font-mono flex-1">{obj}</span>
-              <button type="button" onClick={() => setObjectives(objectives.filter((_, idx) => idx !== i))}>
-                <Trash2 className="w-3 h-3 text-ops-muted hover:text-red-ops" />
-              </button>
-            </div>
-          ))}
-        </div>
+        {objectives.map((obj, i) => (
+          <div key={i} className="flex gap-2">
+            <Textarea
+              value={obj}
+              onChange={(e) => handleObjectiveChange(i, e.target.value)}
+              disabled={isPending}
+              placeholder={`Objective ${i + 1}`}
+              className="bg-ops-surface border-ops-border text-ops-text flex-1"
+              rows={2}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => handleRemoveObjective(i)}
+              disabled={isPending || objectives.length <= 1}
+              className="text-ops-danger hover:bg-ops-danger/10"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        ))}
       </div>
 
-      {error && (
-        <div className="text-red-ops text-xs font-mono border border-red-ops/30 bg-red-ops/10 p-2">
-          ERROR: {(error as Error)?.message || 'Operation failed'}
-        </div>
-      )}
-
-      <div className="flex gap-2 pt-2">
+      <div className="flex gap-3 justify-end pt-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={isPending}
+          className="border-ops-border text-ops-muted hover:bg-ops-surface"
+        >
+          Cancel
+        </Button>
         <Button
           type="submit"
-          disabled={isPending || !codename.trim()}
-          className="flex-1 bg-amber-ops/20 border border-amber-ops/50 text-amber-ops hover:bg-amber-ops/30 font-mono font-bold tracking-widest rounded-none"
+          disabled={isPending}
+          className="bg-ops-accent text-ops-bg hover:bg-ops-accent/90"
         >
-          {isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> PROCESSING...</> : isEditing ? 'UPDATE MISSION' : 'CREATE MISSION'}
-        </Button>
-        <Button type="button" onClick={onClose} variant="outline"
-          className="border-ops-border/60 text-ops-muted hover:text-foreground rounded-none">
-          CANCEL
+          {isPending ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              {isEditing ? 'Updating...' : 'Creating...'}
+            </>
+          ) : isEditing ? (
+            'Update Mission'
+          ) : (
+            'Create Mission'
+          )}
         </Button>
       </div>
     </form>

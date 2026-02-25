@@ -174,6 +174,7 @@ export enum Variant_low_high_medium {
 export interface backendInterface {
     addMissionFieldReport(codename: string, reportContent: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    banUser(principalText: string): Promise<void>;
     createAssetProfile(codename: string, clearanceLevel: ClearanceLevel, specialization: Array<SpecializedSkill>, status: Variant_active_terminated_inactive, bio: string): Promise<void>;
     createClassifiedNote(title: string, body: string, classification: ClearanceLevel, author: string): Promise<void>;
     createMission(codename: string, status: MissionStatus, threatLevel: ThreatLevel, assignedOperatives: Array<string>, missionType: MissionType, objectives: Array<string>): Promise<void>;
@@ -190,6 +191,7 @@ export interface backendInterface {
     getAllMissions(): Promise<Array<Mission>>;
     getAllThreatAssessments(): Promise<Array<ThreatAssessment>>;
     getAssetProfile(codename: string): Promise<AssetProfile>;
+    getBannedUsers(): Promise<Array<string>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getClassifiedNote(title: string): Promise<ClassifiedNote>;
@@ -201,8 +203,10 @@ export interface backendInterface {
     getThreatAssessment(subjectName: string): Promise<ThreatAssessment>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
+    isUserBanned(principalText: string): Promise<boolean>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     saveMissionTemplate(codename: string, status: MissionStatus, threatLevel: ThreatLevel, assignedOperatives: Array<string>, missionType: MissionType, objectives: Array<string>): Promise<void>;
+    unbanUser(principalText: string): Promise<void>;
     updateAssetProfile(codename: string, clearanceLevel: ClearanceLevel, specialization: Array<SpecializedSkill>, status: Variant_active_terminated_inactive, bio: string): Promise<void>;
     updateClassifiedNote(title: string, body: string, classification: ClearanceLevel, author: string): Promise<void>;
     updateMission(codename: string, status: MissionStatus, threatLevel: ThreatLevel, assignedOperatives: Array<string>, missionType: MissionType, objectives: Array<string>): Promise<void>;

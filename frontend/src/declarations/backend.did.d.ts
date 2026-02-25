@@ -150,6 +150,7 @@ export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'addMissionFieldReport' : ActorMethod<[string, string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'banUser' : ActorMethod<[string], undefined>,
   'createAssetProfile' : ActorMethod<
     [
       string,
@@ -205,6 +206,7 @@ export interface _SERVICE {
   'getAllMissions' : ActorMethod<[], Array<Mission>>,
   'getAllThreatAssessments' : ActorMethod<[], Array<ThreatAssessment>>,
   'getAssetProfile' : ActorMethod<[string], AssetProfile>,
+  'getBannedUsers' : ActorMethod<[], Array<string>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getClassifiedNote' : ActorMethod<[string], ClassifiedNote>,
@@ -216,6 +218,7 @@ export interface _SERVICE {
   'getThreatAssessment' : ActorMethod<[string], ThreatAssessment>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
+  'isUserBanned' : ActorMethod<[string], boolean>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'saveMissionTemplate' : ActorMethod<
     [
@@ -228,6 +231,7 @@ export interface _SERVICE {
     ],
     undefined
   >,
+  'unbanUser' : ActorMethod<[string], undefined>,
   'updateAssetProfile' : ActorMethod<
     [
       string,

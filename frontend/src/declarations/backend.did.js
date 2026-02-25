@@ -178,6 +178,7 @@ export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'addMissionFieldReport' : IDL.Func([IDL.Text, IDL.Text], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'banUser' : IDL.Func([IDL.Text], [], []),
   'createAssetProfile' : IDL.Func(
       [
         IDL.Text,
@@ -248,6 +249,7 @@ export const idlService = IDL.Service({
       ['query'],
     ),
   'getAssetProfile' : IDL.Func([IDL.Text], [AssetProfile], ['query']),
+  'getBannedUsers' : IDL.Func([], [IDL.Vec(IDL.Text)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getClassifiedNote' : IDL.Func([IDL.Text], [ClassifiedNote], ['query']),
@@ -267,6 +269,7 @@ export const idlService = IDL.Service({
       ['query'],
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'isUserBanned' : IDL.Func([IDL.Text], [IDL.Bool], ['query']),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'saveMissionTemplate' : IDL.Func(
       [
@@ -280,6 +283,7 @@ export const idlService = IDL.Service({
       [],
       [],
     ),
+  'unbanUser' : IDL.Func([IDL.Text], [], []),
   'updateAssetProfile' : IDL.Func(
       [
         IDL.Text,
@@ -507,6 +511,7 @@ export const idlFactory = ({ IDL }) => {
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'addMissionFieldReport' : IDL.Func([IDL.Text, IDL.Text], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'banUser' : IDL.Func([IDL.Text], [], []),
     'createAssetProfile' : IDL.Func(
         [
           IDL.Text,
@@ -581,6 +586,7 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'getAssetProfile' : IDL.Func([IDL.Text], [AssetProfile], ['query']),
+    'getBannedUsers' : IDL.Func([], [IDL.Vec(IDL.Text)], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getClassifiedNote' : IDL.Func([IDL.Text], [ClassifiedNote], ['query']),
@@ -600,6 +606,7 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'isUserBanned' : IDL.Func([IDL.Text], [IDL.Bool], ['query']),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'saveMissionTemplate' : IDL.Func(
         [
@@ -613,6 +620,7 @@ export const idlFactory = ({ IDL }) => {
         [],
         [],
       ),
+    'unbanUser' : IDL.Func([IDL.Text], [], []),
     'updateAssetProfile' : IDL.Func(
         [
           IDL.Text,

@@ -1,179 +1,249 @@
-import React, { useState } from 'react';
-import { ThreatAssessment, ThreatCategory } from '../backend';
-import { useCreateThreatAssessment, useUpdateThreatAssessment, useGetAllMissions } from '../hooks/useQueries';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
-
-const THREAT_CATEGORIES: { value: ThreatCategory; label: string }[] = [
-  { value: { __kind__: 'cyber', cyber: null }, label: 'CYBER' },
-  { value: { __kind__: 'counterTerror', counterTerror: null }, label: 'COUNTER-TERROR' },
-  { value: { __kind__: 'counterIntelligence', counterIntelligence: null }, label: 'COUNTER-INTEL' },
-  { value: { __kind__: 'counterEspionage', counterEspionage: null }, label: 'COUNTER-ESPIONAGE' },
-  { value: { __kind__: 'counterInsurgency', counterInsurgency: null }, label: 'COUNTER-INSURGENCY' },
-  { value: { __kind__: 'drugSmuggling', drugSmuggling: null }, label: 'DRUG SMUGGLING' },
-  { value: { __kind__: 'humanSmuggling', humanSmuggling: null }, label: 'HUMAN SMUGGLING' },
-  { value: { __kind__: 'armsSmuggling', armsSmuggling: null }, label: 'ARMS SMUGGLING' },
-];
+import type { ThreatAssessment, ThreatCategory } from '../backend';
+import { useCreateThreatAssessment, useUpdateThreatAssessment } from '../hooks/useQueries';
 
 interface ThreatAssessmentFormProps {
-  assessment?: ThreatAssessment;
-  onClose: () => void;
+  existingAssessment?: ThreatAssessment;
+  onSuccess: () => void;
+  onCancel: () => void;
 }
 
-export default function ThreatAssessmentForm({ assessment, onClose }: ThreatAssessmentFormProps) {
-  const [subjectName, setSubjectName] = useState(assessment?.subjectName || '');
-  const [categoryKind, setCategoryKind] = useState<string>(assessment?.threatCategory.__kind__ || 'cyber');
-  const [riskScore, setRiskScore] = useState<number>(Number(assessment?.riskScore || 5));
-  const [summary, setSummary] = useState(assessment?.summary || '');
-  const [linkedMissions, setLinkedMissions] = useState<string[]>(assessment?.linkedMissions || []);
+type ThreatCategoryKey =
+  | 'cyber'
+  | 'counterTerror'
+  | 'counterIntelligence'
+  | 'counterEspionage'
+  | 'counterInsurgency'
+  | 'drugSmuggling'
+  | 'humanSmuggling'
+  | 'armsSmuggling'
+  | 'other';
 
-  const { data: missions = [] } = useGetAllMissions();
-  const createAssessment = useCreateThreatAssessment();
-  const updateAssessment = useUpdateThreatAssessment();
-  const isEditing = !!assessment;
-  const isPending = createAssessment.isPending || updateAssessment.isPending;
+function buildThreatCategory(key: ThreatCategoryKey, otherText: string): ThreatCategory {
+  switch (key) {
+    case 'cyber':
+      return { __kind__: 'cyber', cyber: null };
+    case 'counterTerror':
+      return { __kind__: 'counterTerror', counterTerror: null };
+    case 'counterIntelligence':
+      return { __kind__: 'counterIntelligence', counterIntelligence: null };
+    case 'counterEspionage':
+      return { __kind__: 'counterEspionage', counterEspionage: null };
+    case 'counterInsurgency':
+      return { __kind__: 'counterInsurgency', counterInsurgency: null };
+    case 'drugSmuggling':
+      return { __kind__: 'drugSmuggling', drugSmuggling: null };
+    case 'humanSmuggling':
+      return { __kind__: 'humanSmuggling', humanSmuggling: null };
+    case 'armsSmuggling':
+      return { __kind__: 'armsSmuggling', armsSmuggling: null };
+    case 'other':
+      return { __kind__: 'other', other: otherText };
+  }
+}
 
-  const buildCategory = (): ThreatCategory => {
-    const found = THREAT_CATEGORIES.find(c => c.value.__kind__ === categoryKind);
-    return found?.value || { __kind__: 'cyber', cyber: null };
-  };
+function getThreatCategoryKey(category: ThreatCategory): ThreatCategoryKey {
+  return category.__kind__ as ThreatCategoryKey;
+}
 
-  const toggleMission = (codename: string) => {
-    setLinkedMissions(prev =>
-      prev.includes(codename) ? prev.filter(m => m !== codename) : [...prev, codename]
-    );
-  };
+export default function ThreatAssessmentForm({
+  existingAssessment,
+  onSuccess,
+  onCancel,
+}: ThreatAssessmentFormProps) {
+  const [subjectName, setSubjectName] = useState('');
+  const [categoryKey, setCategoryKey] = useState<ThreatCategoryKey>('cyber');
+  const [otherText, setOtherText] = useState('');
+  const [riskScore, setRiskScore] = useState('50');
+  const [summary, setSummary] = useState('');
+  const [linkedMissionsStr, setLinkedMissionsStr] = useState('');
+
+  const createMutation = useCreateThreatAssessment();
+  const updateMutation = useUpdateThreatAssessment();
+
+  const isEditing = !!existingAssessment;
+  const isPending = createMutation.isPending || updateMutation.isPending;
+
+  useEffect(() => {
+    if (existingAssessment) {
+      setSubjectName(existingAssessment.subjectName);
+      setCategoryKey(getThreatCategoryKey(existingAssessment.threatCategory));
+      if (existingAssessment.threatCategory.__kind__ === 'other') {
+        setOtherText(existingAssessment.threatCategory.other);
+      }
+      setRiskScore(existingAssessment.riskScore.toString());
+      setSummary(existingAssessment.summary);
+      setLinkedMissionsStr(existingAssessment.linkedMissions.join(', '));
+    }
+  }, [existingAssessment]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!subjectName.trim()) return;
+
+    const threatCategory = buildThreatCategory(categoryKey, otherText);
+    const riskScoreBigInt: bigint = BigInt(Math.max(0, Math.min(100, parseInt(riskScore, 10) || 0)));
+    const linkedMissions = linkedMissionsStr
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
 
     const params = {
-      subjectName: subjectName.trim(),
-      threatCategory: buildCategory(),
-      riskScore: BigInt(riskScore),
-      summary: summary.trim(),
+      subjectName,
+      threatCategory,
+      riskScore: riskScoreBigInt,
+      summary,
       linkedMissions,
     };
 
     try {
       if (isEditing) {
-        await updateAssessment.mutateAsync({ ...params, subjectName: assessment.subjectName });
+        await updateMutation.mutateAsync(params);
       } else {
-        await createAssessment.mutateAsync(params);
+        await createMutation.mutateAsync(params);
       }
-      onClose();
+      onSuccess();
     } catch (err) {
-      // error shown below
+      console.error('Threat assessment form error:', err);
     }
   };
 
-  const error = createAssessment.error || updateAssessment.error;
-
-  const riskColor = riskScore <= 3 ? 'text-amber-ops' : riskScore <= 6 ? 'text-orange-400' : 'text-red-ops';
-
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-1">
-          <Label className="text-amber-ops text-xs font-mono tracking-widest">SUBJECT NAME *</Label>
-          <Input
-            value={subjectName}
-            onChange={(e) => setSubjectName(e.target.value)}
-            placeholder="Target/subject identifier"
-            disabled={isEditing}
-            className="ops-input bg-ops-bg border-ops-border/60 text-foreground font-mono text-sm rounded-none focus:border-amber-ops/70"
-            required
-          />
-        </div>
+      <div className="space-y-2">
+        <Label className="text-ops-muted text-xs uppercase tracking-widest">Subject Name</Label>
+        <Input
+          value={subjectName}
+          onChange={(e) => setSubjectName(e.target.value)}
+          disabled={isEditing || isPending}
+          required
+          className="bg-ops-surface border-ops-border text-ops-text"
+          placeholder="Subject codename or identifier"
+        />
+      </div>
 
-        <div className="space-y-1">
-          <Label className="text-amber-ops text-xs font-mono tracking-widest">THREAT CATEGORY</Label>
-          <Select value={categoryKind} onValueChange={setCategoryKind}>
-            <SelectTrigger className="ops-input bg-ops-bg border-ops-border/60 text-foreground font-mono text-sm rounded-none">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label className="text-ops-muted text-xs uppercase tracking-widest">
+            Threat Category
+          </Label>
+          <Select
+            value={categoryKey}
+            onValueChange={(v) => setCategoryKey(v as ThreatCategoryKey)}
+            disabled={isPending}
+          >
+            <SelectTrigger className="bg-ops-surface border-ops-border text-ops-text">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-ops-surface border-ops-border/60 rounded-none">
-              {THREAT_CATEGORIES.map(({ value, label }) => (
-                <SelectItem key={value.__kind__} value={value.__kind__} className="font-mono text-xs">{label}</SelectItem>
-              ))}
+            <SelectContent className="bg-ops-surface border-ops-border">
+              <SelectItem value="cyber">Cyber</SelectItem>
+              <SelectItem value="counterTerror">Counter-Terror</SelectItem>
+              <SelectItem value="counterIntelligence">Counter-Intelligence</SelectItem>
+              <SelectItem value="counterEspionage">Counter-Espionage</SelectItem>
+              <SelectItem value="counterInsurgency">Counter-Insurgency</SelectItem>
+              <SelectItem value="drugSmuggling">Drug Smuggling</SelectItem>
+              <SelectItem value="humanSmuggling">Human Smuggling</SelectItem>
+              <SelectItem value="armsSmuggling">Arms Smuggling</SelectItem>
+              <SelectItem value="other">Other</SelectItem>
             </SelectContent>
           </Select>
         </div>
-      </div>
 
-      <div className="space-y-2">
-        <Label className="text-amber-ops text-xs font-mono tracking-widest">
-          RISK SCORE: <span className={`${riskColor} font-bold`}>{riskScore}/10</span>
-        </Label>
-        <Slider
-          value={[riskScore]}
-          onValueChange={([v]) => setRiskScore(v)}
-          min={1}
-          max={10}
-          step={1}
-          className="w-full"
-        />
-        <div className="flex justify-between text-xs font-mono text-ops-muted">
-          <span>LOW RISK</span>
-          <span>CRITICAL RISK</span>
+        <div className="space-y-2">
+          <Label className="text-ops-muted text-xs uppercase tracking-widest">
+            Risk Score (0–100)
+          </Label>
+          <Input
+            type="number"
+            min="0"
+            max="100"
+            value={riskScore}
+            onChange={(e) => setRiskScore(e.target.value)}
+            disabled={isPending}
+            required
+            className="bg-ops-surface border-ops-border text-ops-text"
+          />
         </div>
       </div>
 
-      <div className="space-y-1">
-        <Label className="text-amber-ops text-xs font-mono tracking-widest">THREAT SUMMARY</Label>
+      {categoryKey === 'other' && (
+        <div className="space-y-2">
+          <Label className="text-ops-muted text-xs uppercase tracking-widest">
+            Specify Category
+          </Label>
+          <Input
+            value={otherText}
+            onChange={(e) => setOtherText(e.target.value)}
+            disabled={isPending}
+            required
+            className="bg-ops-surface border-ops-border text-ops-text"
+            placeholder="Describe the threat category"
+          />
+        </div>
+      )}
+
+      <div className="space-y-2">
+        <Label className="text-ops-muted text-xs uppercase tracking-widest">Summary</Label>
         <Textarea
           value={summary}
           onChange={(e) => setSummary(e.target.value)}
-          placeholder="Detailed threat assessment summary..."
-          rows={3}
-          className="ops-input bg-ops-bg border-ops-border/60 text-foreground font-mono text-xs rounded-none focus:border-amber-ops/70 resize-none"
+          disabled={isPending}
+          required
+          className="bg-ops-surface border-ops-border text-ops-text"
+          placeholder="Threat assessment summary..."
+          rows={4}
         />
       </div>
 
-      {missions.length > 0 && (
-        <div className="space-y-2">
-          <Label className="text-amber-ops text-xs font-mono tracking-widest">LINKED MISSIONS</Label>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 max-h-32 overflow-y-auto">
-            {missions.map((m) => (
-              <label key={m.codename} className="flex items-center gap-2 cursor-pointer group">
-                <Checkbox
-                  checked={linkedMissions.includes(m.codename)}
-                  onCheckedChange={() => toggleMission(m.codename)}
-                  className="border-ops-border/60 data-[state=checked]:bg-amber-ops data-[state=checked]:border-amber-ops rounded-none"
-                />
-                <span className="text-xs font-mono text-ops-muted group-hover:text-foreground transition-colors truncate">
-                  {m.codename}
-                </span>
-              </label>
-            ))}
-          </div>
-        </div>
-      )}
+      <div className="space-y-2">
+        <Label className="text-ops-muted text-xs uppercase tracking-widest">
+          Linked Missions (comma-separated codenames)
+        </Label>
+        <Input
+          value={linkedMissionsStr}
+          onChange={(e) => setLinkedMissionsStr(e.target.value)}
+          disabled={isPending}
+          className="bg-ops-surface border-ops-border text-ops-text"
+          placeholder="NIGHTFALL, IRONCLAD, ..."
+        />
+      </div>
 
-      {error && (
-        <div className="text-red-ops text-xs font-mono border border-red-ops/30 bg-red-ops/10 p-2">
-          ERROR: {(error as Error)?.message}
-        </div>
-      )}
-
-      <div className="flex gap-2 pt-2">
+      <div className="flex gap-3 justify-end pt-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={isPending}
+          className="border-ops-border text-ops-muted hover:bg-ops-surface"
+        >
+          Cancel
+        </Button>
         <Button
           type="submit"
-          disabled={isPending || !subjectName.trim()}
-          className="flex-1 bg-amber-ops/20 border border-amber-ops/50 text-amber-ops hover:bg-amber-ops/30 font-mono font-bold tracking-widest rounded-none"
+          disabled={isPending}
+          className="bg-ops-accent text-ops-bg hover:bg-ops-accent/90"
         >
-          {isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> PROCESSING...</> : isEditing ? 'UPDATE ASSESSMENT' : 'CREATE ASSESSMENT'}
-        </Button>
-        <Button type="button" onClick={onClose} variant="outline"
-          className="border-ops-border/60 text-ops-muted hover:text-foreground rounded-none">
-          CANCEL
+          {isPending ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              {isEditing ? 'Updating...' : 'Creating...'}
+            </>
+          ) : isEditing ? (
+            'Update Assessment'
+          ) : (
+            'Create Assessment'
+          )}
         </Button>
       </div>
     </form>

@@ -274,6 +274,7 @@ export interface backendInterface {
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
     addMissionFieldReport(codename: string, reportContent: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    banUser(principalText: string): Promise<void>;
     createAssetProfile(codename: string, clearanceLevel: ClearanceLevel, specialization: Array<SpecializedSkill>, status: Variant_active_terminated_inactive, bio: string): Promise<void>;
     createClassifiedNote(title: string, body: string, classification: ClearanceLevel, author: string): Promise<void>;
     createMission(codename: string, status: MissionStatus, threatLevel: ThreatLevel, assignedOperatives: Array<string>, missionType: MissionType, objectives: Array<string>): Promise<void>;
@@ -290,6 +291,7 @@ export interface backendInterface {
     getAllMissions(): Promise<Array<Mission>>;
     getAllThreatAssessments(): Promise<Array<ThreatAssessment>>;
     getAssetProfile(codename: string): Promise<AssetProfile>;
+    getBannedUsers(): Promise<Array<string>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getClassifiedNote(title: string): Promise<ClassifiedNote>;
@@ -301,8 +303,10 @@ export interface backendInterface {
     getThreatAssessment(subjectName: string): Promise<ThreatAssessment>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
+    isUserBanned(principalText: string): Promise<boolean>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     saveMissionTemplate(codename: string, status: MissionStatus, threatLevel: ThreatLevel, assignedOperatives: Array<string>, missionType: MissionType, objectives: Array<string>): Promise<void>;
+    unbanUser(principalText: string): Promise<void>;
     updateAssetProfile(codename: string, clearanceLevel: ClearanceLevel, specialization: Array<SpecializedSkill>, status: Variant_active_terminated_inactive, bio: string): Promise<void>;
     updateClassifiedNote(title: string, body: string, classification: ClearanceLevel, author: string): Promise<void>;
     updateMission(codename: string, status: MissionStatus, threatLevel: ThreatLevel, assignedOperatives: Array<string>, missionType: MissionType, objectives: Array<string>): Promise<void>;
@@ -436,6 +440,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.assignCallerUserRole(arg0, to_candid_UserRole_n8(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+    async banUser(arg0: string): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.banUser(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.banUser(arg0);
             return result;
         }
     }
@@ -663,6 +681,20 @@ export class Backend implements backendInterface {
             return from_candid_AssetProfile_n32(this._uploadFile, this._downloadFile, result);
         }
     }
+    async getBannedUsers(): Promise<Array<string>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getBannedUsers();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getBannedUsers();
+            return result;
+        }
+    }
     async getCallerUserProfile(): Promise<UserProfile | null> {
         if (this.processError) {
             try {
@@ -817,6 +849,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async isUserBanned(arg0: string): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.isUserBanned(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.isUserBanned(arg0);
+            return result;
+        }
+    }
     async saveCallerUserProfile(arg0: UserProfile): Promise<void> {
         if (this.processError) {
             try {
@@ -842,6 +888,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.saveMissionTemplate(arg0, to_candid_MissionStatus_n16(this._uploadFile, this._downloadFile, arg1), to_candid_ThreatLevel_n18(this._uploadFile, this._downloadFile, arg2), arg3, to_candid_MissionType_n20(this._uploadFile, this._downloadFile, arg4), arg5);
+            return result;
+        }
+    }
+    async unbanUser(arg0: string): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.unbanUser(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.unbanUser(arg0);
             return result;
         }
     }

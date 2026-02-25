@@ -84,7 +84,7 @@ export default function ThreatAssessmentsSection() {
                     {threatCategoryLabel(assessment.threatCategory)}
                   </span>
                   <span className={`text-xs font-mono font-bold px-2 py-0.5 border ${getRiskBg(assessment.riskScore)} ${getRiskColor(assessment.riskScore)}`}>
-                    RISK: {Number(assessment.riskScore)}/10
+                    RISK: {Number(assessment.riskScore)}/100
                   </span>
                 </div>
                 {assessment.summary && (
@@ -149,8 +149,9 @@ export default function ThreatAssessmentsSection() {
               </DialogTitle>
             </DialogHeader>
             <ThreatAssessmentForm
-              assessment={editingAssessment}
-              onClose={() => { setShowForm(false); setEditingAssessment(undefined); }}
+              existingAssessment={editingAssessment}
+              onSuccess={() => { setShowForm(false); setEditingAssessment(undefined); }}
+              onCancel={() => { setShowForm(false); setEditingAssessment(undefined); }}
             />
           </div>
         </DialogContent>

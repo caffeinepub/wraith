@@ -1,13 +1,14 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 9,
+  "projectStateVersion": 13,
   "summary": "Building a WRAITH-themed classified intelligence app combining: (1) Mission Management Dashboard for tracking covert missions/threats/field reports, (2) Intelligence Hub with asset profiles/threat assessments/encrypted notes, and (4) Field Ops Briefing Tool for building and displaying mission briefings with objectives and HVT profiles.",
   "architectural_notes": [
     "Themed as a classified/clandestine operations center with dark spy-thriller aesthetic",
-    "Operates under the fictional WRAITH universe (Title 50, plausible deniability lore)"
+    "Operates under the fictional WRAITH universe (Title 50, plausible deniability lore)",
+    "Admin panel (passcode-gated) has elevated privileges: ban/kick users, full CRUD on missions and asset profiles across all modules"
   ],
   "known_issues": [],
-  "isFixRequest": false,
+  "isFixRequest": true,
   "existing_features": [
     {
       "id": "feature-create-a-mission-management-dashboard-where-users-can-create-view-update-and-delete-covert-missions-each-mission-must-include-codename-status-active-compromised-completed-aborted-threat-level-low-elevated-critical-assigned-operatives-mission-type-recon-cyber-counter-terror-in-person-op-objectives-list-and-field-reports-timestamped-log-entries-display-missions-in-a-sortable-filterable-list-with-status-badges-and-threat-indicators",
@@ -62,6 +63,30 @@
       "title": "Replace the Internet Identity login requirement on the Admin Panel page with a password entry screen. When the user navigates to /admin, display a styled password input form (matching the WRAITH dark classified-ops theme) prompting for the access passphrase. On correct entry of 'WRAITH123' (verified via the backend `verifyAdminPassword` call), grant access to the AdminPanelContent component. On incorrect entry, display a styled 'ACCESS DENIED — INVALID PASSPHRASE' error. Do not require the user to be logged in via Internet Identity to access the admin panel.",
       "reqIds": [
         "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-expand-the-adminpanelcontent-component-to-include-a-fully-featured-management-dashboard-with-tabbed-or-sectioned-navigation-the-admin-panel-must-include-the-following-sections-after-successful-wraith123-passphrase-authentication-1-user-management-display-a-list-of-all-banned-users-fetched-from-the-backend-allow-the-admin-to-ban-a-user-by-entering-a-principal-id-and-unban-existing-banned-users-with-a-confirmation-dialog-2-mission-management-embed-or-replicate-the-full-missionform-and-missionlist-functionality-so-the-admin-can-create-edit-and-delete-any-mission-directly-from-the-admin-panel-3-asset-profiles-management-embed-or-replicate-the-full-assetprofileform-and-assetprofilessection-functionality-so-the-admin-can-create-edit-and-delete-any-asset-profile-from-the-admin-panel-style-all-sections-consistently-with-the-wraith-dark-classified-ops-theme-near-black-background-amber-red-accents-monospaced-typography-classification-banner-label-the-ban-unban-actions-clearly-e-g-terminate-access-reinstate-access-in-the-wraith-aesthetic",
+      "title": "Expand the AdminPanelContent component to include a fully featured management dashboard with tabbed or sectioned navigation. The admin panel must include the following sections after successful WRAITH123 passphrase authentication: (1) User Management — display a list of all banned users (fetched from the backend), allow the admin to ban a user by entering a principal ID, and unban existing banned users with a confirmation dialog; (2) Mission Management — embed or replicate the full MissionForm and MissionList functionality so the admin can create, edit, and delete any mission directly from the admin panel; (3) Asset Profiles Management — embed or replicate the full AssetProfileForm and AssetProfilesSection functionality so the admin can create, edit, and delete any asset profile from the admin panel. Style all sections consistently with the WRAITH dark classified-ops theme (near-black background, amber/red accents, monospaced typography, classification banner). Label the ban/unban actions clearly (e.g., 'TERMINATE ACCESS', 'REINSTATE ACCESS') in the WRAITH aesthetic.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-react-query-hooks-in-usequeries-ts-or-equivalent-for-the-new-ban-unban-getbannedusers-backend-functions-usegetbannedusers-query-usebanuser-mutation-with-cache-invalidation-and-useunbanuser-mutation-with-cache-invalidation-these-hooks-must-use-the-existing-actor-pattern-established-in-the-codebase",
+      "title": "Add React Query hooks in useQueries.ts (or equivalent) for the new ban/unban/getBannedUsers backend functions: `useGetBannedUsers` (query), `useBanUser` (mutation with cache invalidation), and `useUnbanUser` (mutation with cache invalidation). These hooks must use the existing actor pattern established in the codebase.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-diagnose-and-fix-the-deployment-error-that-caused-the-live-production-deployment-of-version-5-to-fail-ensure-the-backend-motoko-code-main-mo-and-migration-mo-compiles-without-errors-all-frontend-typescript-files-compile-cleanly-and-the-full-application-deploys-successfully",
+      "title": "Diagnose and fix the deployment error that caused the live production deployment of Version 5 to fail. Ensure the backend Motoko code (main.mo and migration.mo) compiles without errors, all frontend TypeScript files compile cleanly, and the full application deploys successfully.",
+      "reqIds": [
+        "REQ-14"
       ],
       "version": 1
     }
@@ -124,6 +149,20 @@
       "summary": "Replace the backend's principal-based admin authorization system with a password-based system. The backend must store a hardcoded or settable admin password (initially 'WRAITH123'). Expose a query or update function `verifyAdminPassword(password: Text) : Bool` that returns true if the provided password matches. Remove or bypass the existing `isAdmin(caller)` principal check for admin panel access. Retain `getAdminList`, `addAdmin`, and `removeAdmin` functions but gate them behind password verification rather than principal checks.",
       "reqIds": [
         "REQ-9"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Expand the admin panel (accessible via WRAITH123 passcode) to include full creator/management capabilities: ban/kick users, create/edit/delete missions, create/edit/delete asset profiles, and general full CRUD access across all modules from the admin interface.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Add a banned users system to the backend. Store a list of banned principal IDs (as Text). Expose the following functions gated behind password verification or callable only from the admin context: `banUser(principalText: Text) : async ()` to add a principal to the ban list, `unbanUser(principalText: Text) : async ()` to remove a principal from the ban list, and `getBannedUsers() : async [Text]` to retrieve the full list. Optionally expose `isUserBanned(principalText: Text) : async Bool` for query-side checks.",
+      "reqIds": [
+        "REQ-11"
       ],
       "status": "pending"
     }

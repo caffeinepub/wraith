@@ -108,7 +108,10 @@ export default function MissionDashboard() {
                 INITIATE NEW OPERATION
               </DialogTitle>
             </DialogHeader>
-            <MissionForm onClose={() => setShowCreateForm(false)} />
+            <MissionForm
+              onSuccess={() => setShowCreateForm(false)}
+              onCancel={() => setShowCreateForm(false)}
+            />
           </div>
         </DialogContent>
       </Dialog>

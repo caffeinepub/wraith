@@ -30,6 +30,11 @@ export default function FieldOpsBriefing() {
     }
   };
 
+  const closeForm = () => {
+    setShowForm(false);
+    setEditingBriefing(undefined);
+  };
+
   if (viewingBriefing) {
     return <BriefingView briefing={viewingBriefing} onClose={() => setViewingBriefing(null)} />;
   }
@@ -183,7 +188,7 @@ export default function FieldOpsBriefing() {
       </div>
 
       {/* Create/Edit dialog */}
-      <Dialog open={showForm} onOpenChange={(open) => { if (!open) { setShowForm(false); setEditingBriefing(undefined); } }}>
+      <Dialog open={showForm} onOpenChange={(open) => { if (!open) closeForm(); }}>
         <DialogContent className="bg-ops-surface border border-amber-ops/30 rounded-none max-w-3xl p-0 overflow-hidden max-h-[90vh] overflow-y-auto">
           <div className="classification-banner-top-secret text-center py-1 text-xs font-display font-bold tracking-widest sticky top-0 z-10">
             ⬛ CLASSIFIED // TOP SECRET ⬛
@@ -195,8 +200,9 @@ export default function FieldOpsBriefing() {
               </DialogTitle>
             </DialogHeader>
             <BriefingForm
-              briefing={editingBriefing}
-              onClose={() => { setShowForm(false); setEditingBriefing(undefined); }}
+              existingBriefing={editingBriefing}
+              onSuccess={closeForm}
+              onCancel={closeForm}
             />
           </div>
         </DialogContent>

@@ -141,8 +141,9 @@ export default function AssetProfilesSection() {
               </DialogTitle>
             </DialogHeader>
             <AssetProfileForm
-              asset={editingAsset}
-              onClose={() => { setShowForm(false); setEditingAsset(undefined); }}
+              existingAsset={editingAsset}
+              onSuccess={() => { setShowForm(false); setEditingAsset(undefined); }}
+              onCancel={() => { setShowForm(false); setEditingAsset(undefined); }}
             />
           </div>
         </DialogContent>

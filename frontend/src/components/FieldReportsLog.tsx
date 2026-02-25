@@ -1,89 +1,100 @@
 import React, { useState } from 'react';
-import { FieldReport } from '../backend';
-import { useAddFieldReport } from '../hooks/useQueries';
-import { formatTimestamp } from '../lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Send, Terminal } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Loader2, FileText, Send } from 'lucide-react';
+import type { Mission, FieldReport } from '../backend';
+import { useAddFieldReport } from '../hooks/useQueries';
 
 interface FieldReportsLogProps {
-  codename: string;
-  reports: FieldReport[];
+  mission: Mission;
 }
 
-export default function FieldReportsLog({ codename, reports }: FieldReportsLogProps) {
-  const [content, setContent] = useState('');
-  const addReport = useAddFieldReport();
+export default function FieldReportsLog({ mission }: FieldReportsLogProps) {
+  const [reportContent, setReportContent] = useState('');
+  const addReportMutation = useAddFieldReport();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!content.trim()) return;
+    if (!reportContent.trim()) return;
     try {
-      await addReport.mutateAsync({ codename, content: content.trim() });
-      setContent('');
+      await addReportMutation.mutateAsync({
+        codename: mission.codename,
+        reportContent: reportContent.trim(),
+      });
+      setReportContent('');
     } catch (err) {
-      // error shown below
+      console.error('Field report error:', err);
     }
   };
 
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-2 border-b border-ops-border/40 pb-2">
-        <Terminal className="w-4 h-4 text-green-ops" />
-        <span className="text-green-ops text-xs font-mono font-bold tracking-widest text-glow-green">
-          FIELD REPORTS LOG — {reports.length} ENTRIES
-        </span>
-      </div>
+  const formatTimestamp = (ts: bigint) => {
+    const ms = Number(ts) / 1_000_000;
+    return new Date(ms).toLocaleString();
+  };
 
-      {/* Reports */}
-      <div className="space-y-2 max-h-64 overflow-y-auto">
-        {reports.length === 0 ? (
-          <div className="text-ops-muted text-xs font-mono text-center py-4 border border-dashed border-ops-border/30">
-            NO FIELD REPORTS ON FILE
-          </div>
+  const sortedReports = [...mission.fieldReports].sort(
+    (a, b) => Number(b.timestamp) - Number(a.timestamp),
+  );
+
+  return (
+    <div className="space-y-4">
+      {/* Submit new report */}
+      <form onSubmit={handleSubmit} className="space-y-2">
+        <Label className="text-ops-muted text-xs uppercase tracking-widest">
+          Submit Field Report
+        </Label>
+        <Textarea
+          value={reportContent}
+          onChange={(e) => setReportContent(e.target.value)}
+          disabled={addReportMutation.isPending}
+          placeholder="Enter field report content..."
+          className="bg-ops-surface border-ops-border text-ops-text"
+          rows={3}
+        />
+        <Button
+          type="submit"
+          disabled={addReportMutation.isPending || !reportContent.trim()}
+          size="sm"
+          className="bg-ops-accent text-ops-bg hover:bg-ops-accent/90"
+        >
+          {addReportMutation.isPending ? (
+            <>
+              <Loader2 className="w-3 h-3 mr-1 animate-spin" /> Submitting...
+            </>
+          ) : (
+            <>
+              <Send className="w-3 h-3 mr-1" /> Submit Report
+            </>
+          )}
+        </Button>
+      </form>
+
+      {/* Reports list */}
+      <div className="space-y-2">
+        <Label className="text-ops-muted text-xs uppercase tracking-widest">
+          Reports ({mission.fieldReports.length})
+        </Label>
+        {sortedReports.length === 0 ? (
+          <p className="text-ops-muted text-sm">No field reports submitted yet.</p>
         ) : (
-          [...reports].reverse().map((report, i) => (
-            <div key={i} className="bg-ops-bg/60 border border-green-ops/20 p-3 font-mono">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-green-ops text-xs tracking-wider">
-                  [{formatTimestamp(report.timestamp)}]
+          sortedReports.map((report: FieldReport, idx: number) => (
+            <div
+              key={idx}
+              className="bg-ops-surface border border-ops-border rounded p-3 space-y-1"
+            >
+              <div className="flex items-center justify-between text-xs text-ops-muted">
+                <span className="flex items-center gap-1">
+                  <FileText className="w-3 h-3" />
+                  {report.author.toString()}
                 </span>
-                <span className="text-ops-muted text-xs">
-                  {report.author.toString().slice(0, 12)}...
-                </span>
+                <span>{formatTimestamp(report.timestamp)}</span>
               </div>
-              <p className="text-foreground text-xs leading-relaxed whitespace-pre-wrap">{report.content}</p>
+              <p className="text-ops-text text-sm whitespace-pre-wrap">{report.content}</p>
             </div>
           ))
         )}
       </div>
-
-      {/* Add report */}
-      <form onSubmit={handleSubmit} className="space-y-2">
-        <Textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="Enter field report content..."
-          rows={3}
-          className="ops-input bg-ops-bg border-ops-border/60 text-foreground font-mono text-xs rounded-none focus:border-green-ops/70 resize-none"
-        />
-        {addReport.isError && (
-          <div className="text-red-ops text-xs font-mono">
-            ERROR: {(addReport.error as Error)?.message}
-          </div>
-        )}
-        <Button
-          type="submit"
-          disabled={addReport.isPending || !content.trim()}
-          className="w-full bg-green-ops/10 border border-green-ops/40 text-green-ops hover:bg-green-ops/20 font-mono text-xs font-bold tracking-widest rounded-none"
-        >
-          {addReport.isPending ? (
-            <><Loader2 className="w-3 h-3 mr-2 animate-spin" /> TRANSMITTING...</>
-          ) : (
-            <><Send className="w-3 h-3 mr-2" /> SUBMIT FIELD REPORT</>
-          )}
-        </Button>
-      </form>
     </div>
   );
 }

@@ -1,23 +1,56 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Replace principal-based admin access with password authentication (WRAITH123)",
+  "title": "Fix Frontend Deployment Error",
   "requirements": [
     {
-      "id": "REQ-10",
-      "summary": "Replace Internet Identity login requirement on Admin Panel with password entry screen using 'WRAITH123' passphrase",
+      "id": "REQ-14",
+      "summary": "Fix TypeScript compilation errors preventing deployment",
       "acceptanceCriteria": [
-        "Navigating to /admin shows a password prompt screen instead of redirecting to Internet Identity login.",
-        "Entering 'WRAITH123' and submitting calls the backend `verifyAdminPassword` function and, on success, renders the AdminPanelContent.",
-        "Entering an incorrect password displays a styled 'ACCESS DENIED — INVALID PASSPHRASE' message without revealing the correct password.",
-        "The password prompt UI matches the WRAITH dark classified-ops theme (near-black background, amber/red accents, monospaced typography).",
-        "Successful password entry persists the authenticated state for the session so the user is not prompted again on re-render."
+        "All frontend TypeScript files compile without type errors",
+        "The application deploys successfully to production with no deployment errors",
+        "All previously implemented features (Mission Dashboard, Intelligence Hub, Field Ops Briefing, Admin Panel with ban/unban system) remain functional after the fix"
       ],
       "file_operations": [
         {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Review and fix any TypeScript type mismatches between frontend mutation/query hooks and the backend interface defined in backend.d.ts. Ensure all backend method calls match the exact signatures in the interface, including correct parameter types (e.g., Time as bigint, Principal objects, enum values). Pay special attention to createMissionBriefing, updateMissionBriefing, createThreatAssessment, and updateThreatAssessment mutations that use complex nested types like BriefingObjective, HVTProfile, ThreatCategory, and ensure they are constructed correctly."
+        },
+        {
+          "path": "frontend/src/components/AdminPanelContent.tsx",
+          "operation": "modify",
+          "description": "Verify that all mutation hooks from useQueries are invoked with correct types matching the backend interface. Check ban/unban operations use string principal text, and all asset/mission/briefing CRUD operations pass correctly typed parameters. Fix any type assertion issues or missing type conversions."
+        },
+        {
+          "path": "frontend/src/components/BriefingForm.tsx",
+          "operation": "modify",
+          "description": "Ensure the briefing form constructs BriefingObjective and HVTProfile objects that exactly match the backend interface types. Verify missionDate is converted to bigint (Time type) correctly, and classificationLevel uses the ClearanceLevel enum properly. Fix any type mismatches in the createMissionBriefing and updateMissionBriefing mutation calls."
+        },
+        {
+          "path": "frontend/src/components/ThreatAssessmentForm.tsx",
+          "operation": "modify",
+          "description": "Fix type issues in threat assessment mutations. Ensure riskScore is passed as bigint, threatCategory uses the correct ThreatCategory variant structure, and linkedMissions is typed as Array<string>. Verify the form data transformation matches the backend createThreatAssessment and updateThreatAssessment signatures."
+        },
+        {
+          "path": "frontend/src/components/MissionForm.tsx",
+          "operation": "modify",
+          "description": "Check that mission creation and update mutations pass all enum types correctly (MissionStatus, ThreatLevel, MissionType) and arrays are properly typed. Ensure assignedOperatives and objectives arrays match Array<string> type requirements from the backend interface."
+        },
+        {
+          "path": "frontend/src/components/AssetProfileForm.tsx",
+          "operation": "modify",
+          "description": "Verify asset profile mutations use correct enum types for ClearanceLevel, Variant_active_terminated_inactive status, and Array<SpecializedSkill> for specialization. Fix any type mismatches in createAssetProfile and updateAssetProfile calls."
+        },
+        {
           "path": "frontend/src/pages/AdminPanel.tsx",
           "operation": "modify",
-          "description": "Replace the current authentication check (Internet Identity + isCallerAdmin) with a password-based authentication flow. Display a full-screen password prompt form styled with WRAITH dark theme (near-black background, amber/red accents, monospace font). On form submission, call the backend `verifyAdminPassword` function. On success, store the authenticated state in React state or sessionStorage and render AdminPanelContent. On failure, display 'ACCESS DENIED — INVALID PASSPHRASE' error message. Remove all Internet Identity login dependencies and admin role checks from this page."
+          "description": "Ensure the admin password verification and isCallerAdmin checks handle Promise types correctly and any async/await patterns are properly typed. Verify the actor method calls match the backend interface signatures."
+        },
+        {
+          "path": "frontend/src/components/FieldReportsLog.tsx",
+          "operation": "modify",
+          "description": "Check that addMissionFieldReport mutation passes the correct parameter types (codename as string, reportContent as string) matching the backend interface. Ensure no type assertion issues exist in the report submission flow."
         }
       ]
     }

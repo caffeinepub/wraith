@@ -4,17 +4,19 @@ import Map "mo:core/Map";
 import Order "mo:core/Order";
 import Runtime "mo:core/Runtime";
 import Principal "mo:core/Principal";
-import Migration "migration";
+import Iter "mo:core/Iter";
+
 import MixinStorage "blob-storage/Mixin";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 
-(with migration = Migration.run)
 actor {
   include MixinStorage();
 
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
+
+  let bannedUsers = Map.empty<Text, ()>();
 
   let adminPassword = "WRAITH123";
 
@@ -146,6 +148,37 @@ actor {
   // Password Management Functions
   public query ({ caller }) func verifyAdminPassword(password : Text) : async Bool {
     password == adminPassword;
+  };
+
+  // Ban User Functions
+
+  public shared ({ caller }) func banUser(principalText : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can ban users");
+    };
+    bannedUsers.add(principalText, ());
+  };
+
+  public shared ({ caller }) func unbanUser(principalText : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can unban users");
+    };
+    bannedUsers.remove(principalText);
+  };
+
+  public query ({ caller }) func getBannedUsers() : async [Text] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can get banned users");
+    };
+    let iter = bannedUsers.keys();
+    iter.toArray();
+  };
+
+  public query ({ caller }) func isUserBanned(principalText : Text) : async Bool {
+    switch (bannedUsers.get(principalText)) {
+      case (?_value) { true };
+      case (null) { false };
+    };
   };
 
   // User Profile Functions

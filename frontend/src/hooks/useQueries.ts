@@ -2,21 +2,24 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
 import type {
   Mission,
-  MissionStatus,
-  ThreatLevel,
-  MissionType,
   AssetProfile,
-  ClearanceLevel,
-  SpecializedSkill,
   ThreatAssessment,
-  ThreatCategory,
   ClassifiedNote,
   MissionBriefing,
+  UserProfile,
   BriefingObjective,
   HVTProfile,
-  UserProfile,
+  ThreatCategory,
+  SpecializedSkill,
 } from '../backend';
-import { Variant_active_terminated_inactive } from '../backend';
+import {
+  ClearanceLevel,
+  MissionStatus,
+  MissionType,
+  ThreatLevel,
+  Variant_active_terminated_inactive,
+  Variant_low_high_medium,
+} from '../backend';
 
 // ─── User Profile ────────────────────────────────────────────────────────────
 
@@ -70,29 +73,29 @@ export function useGetAllMissions() {
   });
 }
 
-export function useGetMission(codename: string) {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<Mission>({
-    queryKey: ['mission', codename],
-    queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.getMission(codename);
-    },
-    enabled: !!actor && !isFetching && !!codename,
-  });
-}
-
-export function useGetMissionsByStatus(status: MissionStatus | null) {
+export function useGetMissionsByStatus(status: MissionStatus) {
   const { actor, isFetching } = useActor();
 
   return useQuery<Mission[]>({
     queryKey: ['missions', 'status', status],
     queryFn: async () => {
-      if (!actor || !status) return [];
+      if (!actor) return [];
       return actor.getMissionsByStatus(status);
     },
-    enabled: !!actor && !isFetching && !!status,
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useGetMissionTemplates() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<Mission[]>({
+    queryKey: ['missionTemplates'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getMissionTemplates();
+    },
+    enabled: !!actor && !isFetching,
   });
 }
 
@@ -116,7 +119,7 @@ export function useCreateMission() {
         params.threatLevel,
         params.assignedOperatives,
         params.missionType,
-        params.objectives
+        params.objectives,
       );
     },
     onSuccess: () => {
@@ -145,12 +148,11 @@ export function useUpdateMission() {
         params.threatLevel,
         params.assignedOperatives,
         params.missionType,
-        params.objectives
+        params.objectives,
       );
     },
-    onSuccess: (_data, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['missions'] });
-      queryClient.invalidateQueries({ queryKey: ['mission', variables.codename] });
     },
   });
 }
@@ -175,13 +177,42 @@ export function useAddFieldReport() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (params: { codename: string; content: string }) => {
+    mutationFn: async (params: { codename: string; reportContent: string }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.addMissionFieldReport(params.codename, params.content);
+      return actor.addMissionFieldReport(params.codename, params.reportContent);
     },
-    onSuccess: (_data, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['missions'] });
-      queryClient.invalidateQueries({ queryKey: ['mission', variables.codename] });
+    },
+  });
+}
+
+export function useSaveMissionTemplate() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (params: {
+      codename: string;
+      status: MissionStatus;
+      threatLevel: ThreatLevel;
+      assignedOperatives: string[];
+      missionType: MissionType;
+      objectives: string[];
+    }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.saveMissionTemplate(
+        params.codename,
+        params.status,
+        params.threatLevel,
+        params.assignedOperatives,
+        params.missionType,
+        params.objectives,
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['missionTemplates'] });
+      queryClient.invalidateQueries({ queryKey: ['missions'] });
     },
   });
 }
@@ -219,7 +250,7 @@ export function useCreateAssetProfile() {
         params.clearanceLevel,
         params.specialization,
         params.status,
-        params.bio
+        params.bio,
       );
     },
     onSuccess: () => {
@@ -246,7 +277,7 @@ export function useUpdateAssetProfile() {
         params.clearanceLevel,
         params.specialization,
         params.status,
-        params.bio
+        params.bio,
       );
     },
     onSuccess: () => {
@@ -303,7 +334,7 @@ export function useCreateThreatAssessment() {
         params.threatCategory,
         params.riskScore,
         params.summary,
-        params.linkedMissions
+        params.linkedMissions,
       );
     },
     onSuccess: () => {
@@ -330,7 +361,7 @@ export function useUpdateThreatAssessment() {
         params.threatCategory,
         params.riskScore,
         params.summary,
-        params.linkedMissions
+        params.linkedMissions,
       );
     },
     onSuccess: () => {
@@ -385,7 +416,7 @@ export function useCreateClassifiedNote() {
         params.title,
         params.body,
         params.classification,
-        params.author
+        params.author,
       );
     },
     onSuccess: () => {
@@ -410,7 +441,7 @@ export function useUpdateClassifiedNote() {
         params.title,
         params.body,
         params.classification,
-        params.author
+        params.author,
       );
     },
     onSuccess: () => {
@@ -473,7 +504,7 @@ export function useCreateMissionBriefing() {
         params.hvtProfiles,
         params.exfilRoutes,
         params.rulesOfEngagement,
-        params.classificationLevel
+        params.classificationLevel,
       );
     },
     onSuccess: () => {
@@ -506,7 +537,7 @@ export function useUpdateMissionBriefing() {
         params.hvtProfiles,
         params.exfilRoutes,
         params.rulesOfEngagement,
-        params.classificationLevel
+        params.classificationLevel,
       );
     },
     onSuccess: () => {
@@ -530,47 +561,57 @@ export function useDeleteMissionBriefing() {
   });
 }
 
-// ─── Mission Templates ───────────────────────────────────────────────────────
+// ─── Ban Management ──────────────────────────────────────────────────────────
 
-export function useGetMissionTemplates() {
+export function useGetBannedUsers() {
   const { actor, isFetching } = useActor();
 
-  return useQuery<Mission[]>({
-    queryKey: ['missionTemplates'],
+  return useQuery<string[]>({
+    queryKey: ['bannedUsers'],
     queryFn: async () => {
       if (!actor) return [];
-      return actor.getMissionTemplates();
+      return actor.getBannedUsers();
     },
     enabled: !!actor && !isFetching,
   });
 }
 
-export function useSaveMissionTemplate() {
+export function useBanUser() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (params: {
-      codename: string;
-      status: MissionStatus;
-      threatLevel: ThreatLevel;
-      assignedOperatives: string[];
-      missionType: MissionType;
-      objectives: string[];
-    }) => {
+    mutationFn: async (principalText: string) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.saveMissionTemplate(
-        params.codename,
-        params.status,
-        params.threatLevel,
-        params.assignedOperatives,
-        params.missionType,
-        params.objectives
-      );
+      return actor.banUser(principalText);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['missionTemplates'] });
-      queryClient.invalidateQueries({ queryKey: ['missions'] });
+      queryClient.invalidateQueries({ queryKey: ['bannedUsers'] });
     },
   });
 }
+
+export function useUnbanUser() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (principalText: string) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.unbanUser(principalText);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bannedUsers'] });
+    },
+  });
+}
+
+// Re-export enums for convenience
+export {
+  ClearanceLevel,
+  MissionStatus,
+  MissionType,
+  ThreatLevel,
+  Variant_active_terminated_inactive,
+  Variant_low_high_medium,
+};

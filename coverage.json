@@ -1,49 +1,61 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-24T20:56:03.116Z",
+  "generatedAt": "2026-02-24T21:35:53.312Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 2,
+    "total": 1,
     "implemented": 1,
     "items": [
       {
-        "id": "REQ-10",
-        "summary": "Replace the Internet Identity login requirement on the Admin Panel page with a password entry screen. When the user navigates to /admin, display a styled password input form (matching the WRAITH dark classified-ops theme) prompting for the access passphrase. On correct entry of 'WRAITH123' (verified via the backend `verifyAdminPassword` call), grant access to the AdminPanelContent component. On incorrect entry, display a styled 'ACCESS DENIED — INVALID PASSPHRASE' error. Do not require the user to be logged in via Internet Identity to access the admin panel.",
+        "id": "REQ-14",
+        "summary": "Diagnose and fix the deployment error that caused the live production deployment of Version 5 to fail. Ensure the backend Motoko code (main.mo and migration.mo) compiles without errors, all frontend TypeScript files compile cleanly, and the full application deploys successfully.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/AdminPanel.tsx"
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/AdminPanelContent.tsx",
+          "frontend/src/components/BriefingForm.tsx",
+          "frontend/src/components/ThreatAssessmentForm.tsx",
+          "frontend/src/components/MissionForm.tsx",
+          "frontend/src/components/AssetProfileForm.tsx",
+          "frontend/src/pages/AdminPanel.tsx",
+          "frontend/src/components/FieldReportsLog.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/AdminPanel.tsx"
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/AdminPanelContent.tsx",
+          "frontend/src/components/BriefingForm.tsx",
+          "frontend/src/components/ThreatAssessmentForm.tsx",
+          "frontend/src/components/MissionForm.tsx",
+          "frontend/src/components/AssetProfileForm.tsx",
+          "frontend/src/pages/AdminPanel.tsx",
+          "frontend/src/components/FieldReportsLog.tsx"
         ]
-      },
-      {
-        "id": "REQ-9",
-        "summary": "Replace the backend's principal-based admin authorization system with a password-based system. The backend must store a hardcoded or settable admin password (initially 'WRAITH123'). Expose a query or update function `verifyAdminPassword(password: Text) : Bool` that returns true if the provided password matches. Remove or bypass the existing `isAdmin(caller)` principal check for admin panel access. Retain `getAdminList`, `addAdmin`, and `removeAdmin` functions but gate them behind password verification rather than principal checks.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
       }
     ]
   },
   "changedFiles": [
     "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
     "frontend/src/components/AdminPanelContent.tsx",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
+    "frontend/src/components/AssetProfileForm.tsx",
+    "frontend/src/components/AssetProfilesSection.tsx",
+    "frontend/src/components/BriefingForm.tsx",
+    "frontend/src/components/FieldReportsLog.tsx",
+    "frontend/src/components/MissionDetail.tsx",
+    "frontend/src/components/MissionForm.tsx",
+    "frontend/src/components/ThreatAssessmentForm.tsx",
+    "frontend/src/components/ThreatAssessmentsSection.tsx",
     "frontend/src/hooks/useQueries.ts",
     "frontend/src/pages/AdminPanel.tsx",
+    "frontend/src/pages/FieldOpsBriefing.tsx",
+    "frontend/src/pages/MissionDashboard.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",
